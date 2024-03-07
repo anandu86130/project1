@@ -17,27 +17,27 @@ func main() {
 	r := gin.Default()
 
 	//user
-	r.POST("/signup", routes.Signup)
-	r.POST("/login", routes.Login)
-	r.GET("/productview", routes.Productview)
-	// r.POST("/otp", routes.Otp)
+	r.POST("/user/signup", routes.Signup)
+	r.POST("/user/otpsignup", routes.Otpsignup)
+	r.POST("/user/resendotp", routes.ResendOtp)
+	r.POST("/user/login", routes.Login)
+	r.GET("/user/product", routes.Productview)
 
 	//admin
-	r.POST("/signin", routes.Signin)
-	r.GET("/getuser", routes.Getuser)
-	r.PATCH("/blockuser/:ID", routes.Blockuser)
+	r.POST("/admin/signin", routes.Signin)
+	r.GET("/admin/getuser", routes.Getuser)
+	r.PATCH("/admin/blockuser/:ID", routes.Blockuser)
 	//category
-	// r.GET("/category", routes.Category)
-	r.GET("/category", routes.Category)
-	r.POST("/addcategory", routes.Addcategory)
-	r.PUT("/editcategory", routes.Editcategory)
-	r.DELETE("/deletecategory", routes.Deletecategory)
+	r.GET("/admin/category", routes.Category)
+	r.POST("/admin/category", routes.Addcategory)
+	r.PATCH("/admin/category/:ID", routes.Editcategory)
+	r.DELETE("/admin/category/:ID", routes.Deletecategory)
 	//product
-	// r.GET("/aproduct", routes.Aproduct)
-	r.GET("/product", routes.Aproduct)
-	r.POST("/addproduct", routes.Addproduct)
-	r.PUT("/editproduct", routes.Editproduct)
-	r.DELETE("/deleteproduct", routes.Deleteproduct)
+	r.GET("/admin/product", routes.Aproduct)
+	r.POST("/admin/product", routes.Addproduct)
+	r.POST("/admin/upload", routes.Upload)
+	r.PATCH("/admin/product/:ID", routes.Editproduct)
+	r.DELETE("/admin/product/:ID", routes.Deleteproduct)
 
 	r.Run(":8080")
 }
