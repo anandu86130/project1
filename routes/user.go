@@ -24,7 +24,7 @@ func Signup(c *gin.Context) {
 
 	var existinguser model.UserModel
 	result := database.DB.Where("email=?", Userdetails.Email).First(&existinguser)
-	if result.Error != nil {
+	if result.Error == nil {
 		c.JSON(http.StatusInternalServerError, "this user already exists")
 		return
 	}
@@ -79,18 +79,20 @@ func Otpsignup(c *gin.Context) {
 		return
 	}
 
-	if existingotp.Otp != otp.Otp {
-		c.JSON(http.StatusBadRequest, "invalid otp")
-		return
-	} else {
-		create := database.DB.Create(&Userdetails)
-		fmt.Println(Userdetails)
-		if create.Error != nil {
-			c.JSON(http.StatusInternalServerError, "failed to create user")
-			return
-		}
+	// if existingotp.Otp != otp.Otp {
+	// 	c.JSON(http.StatusBadRequest, "invalid otp")
+	// 	return
+	// }
+		
+	create := database.DB.Create(&Userdetails)
+	fmt.Println(Userdetails)
+	if create.Error != nil {
+	c.JSON(http.StatusInternalServerError, "failed to create user")
+	return
+	}else{
 		c.JSON(http.StatusOK, "user created successfully")
 	}
+	
 }
 
 func ResendOtp(c *gin.Context) {
