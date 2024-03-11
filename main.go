@@ -5,6 +5,8 @@ import (
 	"project1/helper"
 	"project1/routes"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,6 +17,9 @@ func init() {
 
 func main() {
 	r := gin.Default()
+
+	store := cookie.NewStore([]byte("secret"))
+	sessions.Sessions("mysession", store)
 
 	//user
 	r.POST("/user/signup", routes.Signup)

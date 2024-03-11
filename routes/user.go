@@ -114,6 +114,9 @@ func Otpsignup(c *gin.Context) {
 // }
 
 func AddAddress(c *gin.Context) {
+	// user, _ := c.Get("ID")
+	// userID := user.(model.UserModel).ID
+
 	var address model.Address
 	err := c.BindJSON(&address)
 	if err != nil {
@@ -122,16 +125,13 @@ func AddAddress(c *gin.Context) {
 	}
 
 	var dbaddress model.Address
-	result := database.DB.Where("address=?", address.Address).First(&dbaddress)
-	if result.Error != nil {
-		c.JSON(http.StatusConflict, "failed to fetch address")
-		return
-	}
+	// dbaddress.User_ID = userID
+	database.DB.Where("address=?", address.Address).First(&dbaddress)
 
-	if address.Address == dbaddress.Address {
-		c.JSON(http.StatusConflict, "this address already exists")
-		return
-	}
+	// if dbaddress.ID != 0 && address.Address == dbaddress.Address {
+	// 	c.JSON(http.StatusConflict, "this address already exists")
+	// 	return
+	// }
 
 	if len(address.Pincode) != 6 {
 		c.JSON(http.StatusInternalServerError, "invalid pincode")
@@ -145,6 +145,7 @@ func AddAddress(c *gin.Context) {
 		State:    address.State,
 		Country:  address.Country,
 		Pincode:  address.Pincode,
+		// User_ID:  address.User_ID,
 	})
 	if create.Error != nil {
 		c.JSON(http.StatusInternalServerError, "failed to create address")

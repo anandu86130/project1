@@ -23,7 +23,7 @@ type OTP struct {
 }
 type Address struct {
 	ID       uint   `gorm:"primaryKey;autoIncrement" json:"_id"`
-	Address  string `json:"address" gorm:"not null"`
+	Address  string `json:"address" gorm:"not null;unique"`
 	City     string `json:"city" gorm:"not null"`
 	Landmark string `json:"landmark" gorm:"not null"`
 	State    string `json:"state" gorm:"not null"`
