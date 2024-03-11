@@ -23,7 +23,8 @@ type OTP struct {
 }
 type Address struct {
 	ID       uint   `gorm:"primaryKey;autoIncrement" json:"_id"`
-	Addres   string `json:"address"`
+	UserID   uint   `gorm:"foreignKey:Addresses" json:"user_id"`
+	Address  string `json:"address"`
 	City     string `json:"city"`
 	Street   string `json:"street"`
 	Landmark string `json:"landmark"`
@@ -42,11 +43,12 @@ type Category struct {
 
 type Product struct {
 	gorm.Model
-	ProductId    uint   `gorm:"primaryKey;autoIncrement" json:"_id"`
-	Product_name string `json:"name"`
-	ImagePath1   string
-	ImagePath2   string
-	ImagePath3   string
+	ProductId    uint       `gorm:"primaryKey;autoIncrement" json:"_id"`
+	Product_name string     `json:"name"`
+	ImagePath1   string     `json:"imagepath1"`
+	ImagePath2   string     `json:"imagepath2"`
+	ImagePath3   string     `json:"imagepath3"`
+	Description  string     `json:"description"`
 	Price        uint       `json:"price"`
 	Size         string     `json:"size"`
 	Quantity     uint       `json:"quantity"`

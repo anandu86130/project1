@@ -1,21 +1,3 @@
-// package otp
-
-// import (
-// 	"crypto/rand"
-// 	"encoding/base64"
-// )
-
-// func GenerateOTP() string {
-// 	randomBytes := make([]byte, 4)
-// 	_, err := rand.Read(randomBytes)
-// 	if err != nil {
-// 		return ""
-// 	}
-
-// 	otp := base64.URLEncoding.EncodeToString(randomBytes)
-// 	return otp
-// }
-
 package otp
 
 import (

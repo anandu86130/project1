@@ -57,8 +57,8 @@ func Getuser(c *gin.Context) {
 // category
 func Category(c *gin.Context) {
 	var category []model.Category
-	resutlt := database.DB.Find(&category)
-	if resutlt.Error != nil {
+	result := database.DB.Find(&category)
+	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, "failed to load category")
 		return
 	}
@@ -83,8 +83,8 @@ func Addcategory(c *gin.Context) {
 		return
 	}
 	var dbcat model.Category
-	result := database.DB.Where("name = ?", category.Name).First(&dbcat)
-	if result.Error == nil {
+	database.DB.Where("name = ?", category.Name).First(&dbcat)
+	if dbcat.Name == category.Name {
 		c.JSON(http.StatusConflict, "this category already exists")
 		return
 	}
@@ -108,14 +108,15 @@ func Aproduct(c *gin.Context) {
 	var products []gin.H
 	for _, fetchedproducts := range product {
 		productdetails := gin.H{
-			"id":         fetchedproducts.ProductId,
-			"name":       fetchedproducts.Product_name,
-			"imagepath1": fetchedproducts.ImagePath1,
-			"imagepath2": fetchedproducts.ImagePath2,
-			"imagepath3": fetchedproducts.ImagePath3,
-			"price":      fetchedproducts.Price,
-			"size":       fetchedproducts.Size,
-			"quantity":   fetchedproducts.Quantity,
+			"id":          fetchedproducts.ProductId,
+			"name":        fetchedproducts.Product_name,
+			"imagepath1":  fetchedproducts.ImagePath1,
+			"imagepath2":  fetchedproducts.ImagePath2,
+			"imagepath3":  fetchedproducts.ImagePath3,
+			"description": fetchedproducts.Description,
+			"price":       fetchedproducts.Price,
+			"size":        fetchedproducts.Size,
+			"quantity":    fetchedproducts.Quantity,
 		}
 		products = append(products, productdetails)
 	}
@@ -123,14 +124,18 @@ func Aproduct(c *gin.Context) {
 }
 
 func Addproduct(c *gin.Context) {
-
 	err := c.BindJSON(&Product)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, "failed to bind")
 		return
 	}
 	var dbproduct model.Product
-	database.DB.Where("product_name=?", Product.Product_name).Find(&dbproduct)
+	result := database.DB.Where("product_name=?", Product.Product_name).Find(&dbproduct)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, "failed to fetch product name")
+		return
+	}
+
 	if dbproduct.Product_name == Product.Product_name {
 		c.JSON(http.StatusConflict, "this product already exists")
 		return
@@ -188,14 +193,19 @@ func Upload(c *gin.Context) {
 }
 
 func Blockuser(c *gin.Context) {
-	var status model.UserModel
+	var user model.UserModel
 	id := c.Param("ID")
-	database.DB.First(&status, id)
-	if status.Status {
-		database.DB.Model(&status).Update("status", false)
+	result := database.DB.First(&user, id)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, "failed to fetch id")
+		return
+	}
+
+	if user.Status {
+		database.DB.Model(&user).Update("status", false)
 		c.JSON(http.StatusOK, "User Blocked")
 	} else {
-		database.DB.Model(&status).Update("status", true)
+		database.DB.Model(&user).Update("status", true)
 		c.JSON(http.StatusOK, "User Unblocked")
 	}
 }
@@ -203,8 +213,8 @@ func Blockuser(c *gin.Context) {
 func Editcategory(c *gin.Context) {
 	var edit model.Category
 	id := c.Param("ID")
-	err := c.BindJSON(&edit)
-	if err != nil {
+	result := c.BindJSON(&edit)
+	if result != nil {
 		c.JSON(http.StatusBadRequest, "failed to bind")
 		return
 	}
@@ -234,7 +244,7 @@ func Editproduct(c *gin.Context) {
 	var editproduct model.Product
 	fetch := database.DB.First(&editproduct, id)
 	if fetch.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to fetch category")
+		c.JSON(http.StatusInternalServerError, "failed to fetch product")
 		return
 	}
 

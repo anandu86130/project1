@@ -25,5 +25,4 @@ func SendOTPByEmail(Email, Otp string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("=================")
 }

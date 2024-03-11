@@ -55,7 +55,7 @@ func Signup(c *gin.Context) {
 	}
 
 	send.SendOTPByEmail(newOTP.Email, newOTP.Otp)
-	c.JSON(http.StatusOK, "OTP send successfully")
+	c.JSON(http.StatusOK, "OTP send succcessfully")
 }
 
 func Otpsignup(c *gin.Context) {
@@ -79,34 +79,52 @@ func Otpsignup(c *gin.Context) {
 		return
 	}
 
-	// if existingotp.Otp != otp.Otp {
-	// 	c.JSON(http.StatusBadRequest, "invalid otp")
-	// 	return
-	// }
-		
+	if existingotp.Otp != otp.Otp {
+		c.JSON(http.StatusBadRequest, "invalid otp")
+		return
+	}
+
 	create := database.DB.Create(&Userdetails)
 	fmt.Println(Userdetails)
 	if create.Error != nil {
-	c.JSON(http.StatusInternalServerError, "failed to create user")
-	return
-	}else{
+		c.JSON(http.StatusInternalServerError, "failed to create user")
+		return
+	} else {
 		c.JSON(http.StatusOK, "user created successfully")
 	}
-	
+
 }
+
+// func Profile(c *gin.Context) {
+// 	var user []model.UserModel
+// 	result := database.DB.Find(&user)
+// 	if result.Error != nil {
+// 		c.JSON(http.StatusBadRequest, "failed to find user")
+// 		return
+// 	}
+
+// 	var users []gin.H
+// 	for _, details := range user {
+// 		userdata := gin.H{
+// 			"name": details.Name,
+// 		}
+// 		users = append(users, userdata)
+// 	}
+// 	c.JSON(http.StatusOK, users)
+// }
 
 func ResendOtp(c *gin.Context) {
 	var fetch model.OTP
 	err := c.BindJSON(&fetch)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, "failed to fetch user")
+		c.JSON(http.StatusInternalServerError, "failed to fetch email")
 		return
 	}
 
 	var existinguser model.OTP
 	fetcheddata := database.DB.Where("email=?", fetch.Email).First(&existinguser)
 	if fetcheddata.Error != nil {
-		c.JSON(http.StatusBadRequest, "user not found")
+		c.JSON(http.StatusBadRequest, "email not found")
 		return
 	}
 
@@ -114,7 +132,7 @@ func ResendOtp(c *gin.Context) {
 
 	result := database.DB.Model(&model.OTP{}).Where("email=?", fetch.Email).Updates(model.OTP{Otp: newOTP, Exp: time.Now().Add(1 * time.Minute)})
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to update otp")
+		c.JSON(http.StatusInternalServerError, "failed to resend otp")
 		return
 	}
 
@@ -162,14 +180,15 @@ func Productview(c *gin.Context) {
 	var productview []gin.H
 	for _, fetchedproducts := range product {
 		details := gin.H{
-			"id":         fetchedproducts.ProductId,
-			"name":       fetchedproducts.Product_name,
-			"imagepath1": fetchedproducts.ImagePath1,
-			"imagepath2": fetchedproducts.ImagePath2,
-			"imagepath3": fetchedproducts.ImagePath3,
-			"price":      fetchedproducts.Price,
-			"size":       fetchedproducts.Size,
-			"quantity":   fetchedproducts.Quantity,
+			"id":          fetchedproducts.ProductId,
+			"name":        fetchedproducts.Product_name,
+			"imagepath1":  fetchedproducts.ImagePath1,
+			"imagepath2":  fetchedproducts.ImagePath2,
+			"imagepath3":  fetchedproducts.ImagePath3,
+			"description": fetchedproducts.Description,
+			"price":       fetchedproducts.Price,
+			"size":        fetchedproducts.Size,
+			"quantity":    fetchedproducts.Quantity,
 		}
 		productview = append(productview, details)
 	}
