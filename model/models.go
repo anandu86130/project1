@@ -23,14 +23,13 @@ type OTP struct {
 }
 type Address struct {
 	ID       uint   `gorm:"primaryKey;autoIncrement" json:"_id"`
-	UserID   uint   `gorm:"foreignKey:Addresses" json:"user_id"`
-	Address  string `json:"address"`
-	City     string `json:"city"`
-	Street   string `json:"street"`
-	Landmark string `json:"landmark"`
-	State    string `json:"state"`
-	Country  string `json:"country"`
-	Pincode  uint   `json:"pincode"`
+	Address  string `json:"address" gorm:"not null"`
+	City     string `json:"city" gorm:"not null"`
+	Landmark string `json:"landmark" gorm:"not null"`
+	State    string `json:"state" gorm:"not null"`
+	Country  string `json:"country" gorm:"not null"`
+	Pincode  string `json:"pincode" gorm:"not null"`
+	User_ID  uint   `json:"userid" gorm:"not null"`
 }
 
 type Category struct {

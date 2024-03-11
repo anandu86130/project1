@@ -21,7 +21,10 @@ func main() {
 	r.POST("/user/otpsignup", routes.Otpsignup)
 	r.POST("/user/resendotp", routes.ResendOtp)
 	r.POST("/user/login", routes.Login)
-	r.GET("/user/profile", routes.Profile)
+	// r.GET("/user/profile", routes.Profile)
+	r.POST("/user/address", routes.AddAddress)
+	r.PATCH("/user/address/:ID", routes.EditAddress)
+	r.DELETE("/user/address/:ID", routes.Deleteaddress)
 	r.GET("/user/product", routes.Productview)
 
 	//admin

@@ -113,6 +113,97 @@ func Otpsignup(c *gin.Context) {
 // 	c.JSON(http.StatusOK, users)
 // }
 
+func AddAddress(c *gin.Context) {
+	var address model.Address
+	err := c.BindJSON(&address)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "failed to bind")
+		return
+	}
+
+	var dbaddress model.Address
+	result := database.DB.Where("address=?", address.Address).First(&dbaddress)
+	if result.Error != nil {
+		c.JSON(http.StatusConflict, "failed to fetch address")
+		return
+	}
+
+	if address.Address == dbaddress.Address {
+		c.JSON(http.StatusConflict, "this address already exists")
+		return
+	}
+
+	if len(address.Pincode) != 6 {
+		c.JSON(http.StatusInternalServerError, "invalid pincode")
+		return
+	}
+
+	create := database.DB.Create(&model.Address{
+		Address:  address.Address,
+		City:     address.City,
+		Landmark: address.Landmark,
+		State:    address.State,
+		Country:  address.Country,
+		Pincode:  address.Pincode,
+	})
+	if create.Error != nil {
+		c.JSON(http.StatusInternalServerError, "failed to create address")
+		return
+	}
+
+	c.JSON(http.StatusOK, "Address added successfully")
+}
+
+func EditAddress(c *gin.Context) {
+	var address model.Address
+	err := c.BindJSON(&address)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, "failed to bind")
+		return
+	}
+
+	addressID := c.Param("ID")
+
+	var dbaddress model.Address
+	result := database.DB.Where("id=?", addressID).First(&dbaddress)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, "address not found")
+		return
+	}
+
+	dbaddress.Address = address.Address
+	dbaddress.City = address.City
+	dbaddress.Country = address.City
+	dbaddress.Landmark = address.Landmark
+	dbaddress.Pincode = address.Pincode
+	dbaddress.State = address.State
+
+	update := database.DB.Save(&dbaddress)
+	if update.Error != nil {
+		c.JSON(http.StatusInternalServerError, "failed to update address")
+		return
+	}
+
+	c.JSON(http.StatusOK, "address updated successfully")
+}
+
+func Deleteaddress(c *gin.Context) {
+	addressID := c.Param("ID")
+	var dbaddress model.Address
+	result := database.DB.Where("id=?", addressID).First(&dbaddress)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, "address not found")
+		return
+	}
+	delete := database.DB.Delete(&dbaddress)
+	if delete.Error != nil {
+		c.JSON(http.StatusInternalServerError, "failed to delete address")
+		return
+	}
+
+	c.JSON(http.StatusOK, "address deleted successfully")
+}
+
 func ResendOtp(c *gin.Context) {
 	var fetch model.OTP
 	err := c.BindJSON(&fetch)
