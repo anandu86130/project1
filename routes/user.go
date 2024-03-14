@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"project1/database"
+	"project1/jwt"
 	"project1/model"
 	"project1/otp"
 	"project1/send"
@@ -14,6 +15,7 @@ import (
 )
 
 var Userdetails model.UserModel
+const RoleUser = "user"
 
 func Signup(c *gin.Context) {
 	err := c.ShouldBindJSON(&Userdetails)
@@ -254,6 +256,7 @@ func Login(c *gin.Context) {
 		return
 	} else {
 		if existinguser.Status {
+			jwt.JwtToken(c, userlogin.ID, userlogin.Email, RoleUser)
 			c.JSON(http.StatusOK, "Login successfully")
 		} else {
 			c.JSON(http.StatusUnauthorized, "blocked user")

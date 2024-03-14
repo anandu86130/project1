@@ -3,6 +3,7 @@ package routes
 import (
 	"net/http"
 	"project1/database"
+	"project1/jwt"
 	"project1/model"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 )
 
 var Product model.Product
+const RoleAdmin = "admin"
 
 func Signin(c *gin.Context) {
 	var admin model.AdminModel
@@ -31,6 +33,7 @@ func Signin(c *gin.Context) {
 		return
 	}
 
+	jwt.JwtToken(c, admin.ID, admin.Email, RoleAdmin)
 	c.JSON(http.StatusOK, "successfully signed in")
 
 }

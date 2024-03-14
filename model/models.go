@@ -7,7 +7,7 @@ import (
 )
 
 type UserModel struct {
-	ID        uint   `gorm:"primaryKey;autoIncrement" json:"_id"`
+	ID        uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name      string `json:"name" gorm:"not null"`
 	Email     string `gorm:"unique;not null" json:"email"`
 	Addresses string `json:"address" gorm:"not null"`
@@ -16,13 +16,13 @@ type UserModel struct {
 }
 
 type OTP struct {
-	ID    uint   `gorm:"primaryKey;autoIncrement" json:"_id"`
+	ID    uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	Otp   string `json:"otp"`
 	Email string `json:"email" gorm:"not null;unique"`
 	Exp   time.Time
 }
 type Address struct {
-	ID       uint   `gorm:"primaryKey;autoIncrement" json:"_id"`
+	ID       uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	Address  string `json:"address" gorm:"not null;unique"`
 	City     string `json:"city" gorm:"not null"`
 	Landmark string `json:"landmark" gorm:"not null"`
@@ -34,7 +34,7 @@ type Address struct {
 
 type Category struct {
 	gorm.Model
-	CategoryId  uint       `gorm:"primaryKey;autoIncrement" json:"_id"`
+	CategoryId  uint       `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name        string     `json:"name" gorm:"not null;unique"`
 	Description string     `gorm:"not null" json:"description"`
 	DeletedAt   *time.Time `gorm:"index"`
@@ -42,7 +42,7 @@ type Category struct {
 
 type Product struct {
 	gorm.Model
-	ProductId    uint       `gorm:"primaryKey;autoIncrement" json:"_id"`
+	ProductId    uint       `gorm:"primaryKey;autoIncrement" json:"id"`
 	Product_name string     `json:"name"`
 	ImagePath1   string     `json:"imagepath1"`
 	ImagePath2   string     `json:"imagepath2"`
@@ -56,6 +56,7 @@ type Product struct {
 
 type AdminModel struct {
 	gorm.Model
+	ID       uint   `gorm:"primaryKey" json:"id"`
 	Name     string `json:"name"`
 	Email    string `gorm:"unique" json:"email"`
 	Password string `json:"password"`
