@@ -7,12 +7,11 @@ import (
 )
 
 type UserModel struct {
-	ID        uint   `gorm:"primaryKey;autoIncrement" json:"id"`
-	Name      string `json:"name" gorm:"not null"`
-	Email     string `gorm:"unique;not null" json:"email"`
-	Addresses string `json:"address" gorm:"not null"`
-	Password  string `json:"password" gorm:"not null"`
-	Status    bool   `gorm:"not null" json:"status"`
+	ID       uint   `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name     string `json:"name" gorm:"not null"`
+	Email    string `gorm:"unique;not null" json:"email"`
+	Password string `json:"password" gorm:"not null"`
+	Status   bool   `gorm:"not null" json:"status"`
 }
 
 type OTP struct {
@@ -21,6 +20,7 @@ type OTP struct {
 	Email string `json:"email" gorm:"not null;unique"`
 	Exp   time.Time
 }
+
 type Address struct {
 	ID       uint   `gorm:"primaryKey;autoIncrement" json:"id"`
 	Address  string `json:"address" gorm:"not null;unique"`
@@ -29,7 +29,8 @@ type Address struct {
 	State    string `json:"state" gorm:"not null"`
 	Country  string `json:"country" gorm:"not null"`
 	Pincode  string `json:"pincode" gorm:"not null"`
-	User_ID  uint   `json:"userid" gorm:"not null"`
+	UserId   uint   `json:"userid" gorm:"not null"`
+	User     UserModel
 }
 
 type Category struct {
@@ -52,6 +53,15 @@ type Product struct {
 	Size         string     `json:"size"`
 	Quantity     uint       `json:"quantity"`
 	DeletedAt    *time.Time `gorm:"index"`
+}
+
+type Cart struct {
+	Id        uint `gorm:"PrimaryKey;autoIncrement" json:"id"`
+	UserID    uint `gorm:"user_id"`
+	User      UserModel
+	ProductId uint
+	Products  Product
+	Quantity  uint
 }
 
 type AdminModel struct {
