@@ -18,10 +18,10 @@ func main() {
 	r := gin.Default()
 
 	//user
-	r.POST("/user/signup",jwt.AuthMiddleware("user"), routes.Signup)
-	r.POST("/user/otpsignup",jwt.AuthMiddleware("user"), routes.Otpsignup)
-	r.POST("/user/resendotp", jwt.AuthMiddleware("user"),routes.ResendOtp)
-	r.POST("/user/login",jwt.AuthMiddleware("user"), routes.Login)
+	r.POST("/user/signup", routes.Signup)
+	r.POST("/user/otpsignup", routes.Otpsignup)
+	r.POST("/user/resendotp",routes.ResendOtp)
+	r.POST("/user/login",routes.Login)
 	// r.GET("/user/profile", routes.Profile)
 	r.POST("/user/address", jwt.AuthMiddleware("user"),routes.AddAddress)
 	r.PATCH("/user/address/:ID", jwt.AuthMiddleware("user"),routes.EditAddress)
@@ -29,7 +29,7 @@ func main() {
 	r.GET("/user/product", jwt.AuthMiddleware("user"),routes.Productview)
 
 	//admin
-	r.POST("/admin/signin", jwt.AuthMiddleware("admin"),routes.Signin)
+	r.POST("/admin/signin",routes.Signin)
 	r.GET("/admin/getuser", jwt.AuthMiddleware("admin"),routes.Getuser)
 	r.PATCH("/admin/blockuser/:ID", jwt.AuthMiddleware("admin"),routes.Blockuser)
 	//category

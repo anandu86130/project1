@@ -15,6 +15,7 @@ import (
 )
 
 var Userdetails model.UserModel
+
 const RoleUser = "user"
 
 func Signup(c *gin.Context) {

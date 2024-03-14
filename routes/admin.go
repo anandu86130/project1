@@ -11,6 +11,7 @@ import (
 )
 
 var Product model.Product
+
 const RoleAdmin = "admin"
 
 func Signin(c *gin.Context) {
