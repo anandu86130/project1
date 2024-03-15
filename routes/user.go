@@ -70,7 +70,7 @@ func Otpsignup(c *gin.Context) {
 	}
 
 	var existingotp model.OTP
-	result := database.DB.Where("otp=?", otp.Otp).First(&existingotp)
+	result := database.DB.Where("email=?", Userdetails.Email).First(&existingotp)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, "failed to fetch otp")
 		return
@@ -95,7 +95,6 @@ func Otpsignup(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, "user created successfully")
 	}
-
 }
 
 // func Profile(c *gin.Context) {

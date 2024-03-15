@@ -192,7 +192,6 @@ func Upload(c *gin.Context) {
 		return
 	}
 	Product = model.Product{}
-
 	c.JSON(http.StatusOK, "product created successfully")
 }
 
