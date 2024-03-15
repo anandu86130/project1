@@ -275,7 +275,6 @@ func Productview(c *gin.Context) {
 	var productview []gin.H
 	for _, fetchedproducts := range product {
 		details := gin.H{
-			"id":          fetchedproducts.ProductId,
 			"name":        fetchedproducts.Product_name,
 			"imagepath1":  fetchedproducts.ImagePath1,
 			"imagepath2":  fetchedproducts.ImagePath2,

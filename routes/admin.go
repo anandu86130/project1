@@ -70,7 +70,6 @@ func Category(c *gin.Context) {
 	var categories []gin.H
 	for _, categorydetails := range category {
 		fetchedcategory := gin.H{
-			"id":          categorydetails.CategoryId,
 			"name":        categorydetails.Name,
 			"description": categorydetails.Description,
 		}
@@ -112,7 +111,6 @@ func Aproduct(c *gin.Context) {
 	var products []gin.H
 	for _, fetchedproducts := range product {
 		productdetails := gin.H{
-			"id":          fetchedproducts.ProductId,
 			"name":        fetchedproducts.Product_name,
 			"imagepath1":  fetchedproducts.ImagePath1,
 			"imagepath2":  fetchedproducts.ImagePath2,

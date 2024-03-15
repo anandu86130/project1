@@ -30,6 +30,7 @@ func main() {
 	r.PATCH("/user/address/:ID", jwt.AuthMiddleware("user"), routes.EditAddress)
 	r.DELETE("/user/address/:ID", jwt.AuthMiddleware("user"), routes.Deleteaddress)
 	r.GET("/user/product", jwt.AuthMiddleware("user"), routes.Productview)
+	r.GET("/user/cart", jwt.AuthMiddleware("user"),routes.CartView)
 
 	//admin
 	r.POST("/admin/signin", routes.Signin)
