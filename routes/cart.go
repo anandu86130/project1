@@ -41,3 +41,30 @@ func CartView(c *gin.Context) {
 	}
 	cart = []model.Cart{}
 }
+
+func Addtocart(c *gin.Context) {
+	var cart model.Cart
+	var product model.Product
+	userID := c.GetUint("userid")
+	id := c.Param("ID")
+
+	result := database.DB.First(&product, id)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find product stock details"})
+		return
+	}
+
+	err := database.DB.Where("user_id=? AND product_id=?", userID, id).First(&cart)
+	if err.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find products"})
+		return
+	}
+
+	cart.Quantity += 1
+	if product.Quantity >= cart.Quantity && cart.Quantity <= 5 {
+			err := database.DB.Where("user_id=? AND product_id", userID, cart.ProductId).Save(&cart)
+			if err != nil{
+				c.JSON(http.StatusOK, gin.H{"error":""})
+			}
+		}
+	}
