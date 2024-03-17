@@ -250,8 +250,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	result := bcrypt.CompareHashAndPassword([]byte(existinguser.Password), []byte(userlogin.Password))
-	if result != nil {
+	password := bcrypt.CompareHashAndPassword([]byte(existinguser.Password), []byte(userlogin.Password))
+	if password != nil {
 		c.JSON(http.StatusUnauthorized, "invalid email or password")
 		return
 	} else {

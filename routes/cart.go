@@ -1,11 +1,14 @@
 package routes
 
 import (
+	"errors"
 	"net/http"
 	"project1/database"
 	"project1/model"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func CartView(c *gin.Context) {
@@ -43,28 +46,54 @@ func CartView(c *gin.Context) {
 }
 
 func Addtocart(c *gin.Context) {
-	var cart model.Cart
-	var product model.Product
 	userID := c.GetUint("userid")
-	id := c.Param("ID")
-
-	result := database.DB.First(&product, id)
+	idStr := c.Param("ID")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to convert"})
+		return
+	}
+	var cart model.Cart
+	result := database.DB.Where("user_id = ? AND ProductId = ?", userID, id).First(&cart)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find product stock details"})
-		return
-	}
-
-	err := database.DB.Where("user_id=? AND product_id=?", userID, id).First(&cart)
-	if err.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find products"})
-		return
-	}
-
-	cart.Quantity += 1
-	if product.Quantity >= cart.Quantity && cart.Quantity <= 5 {
-			err := database.DB.Where("user_id=? AND product_id", userID, cart.ProductId).Save(&cart)
-			if err != nil{
-				c.JSON(http.StatusOK, gin.H{"error":""})
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			cart = model.Cart{
+				UserID:    userID,
+				ProductId: uint(id),
+				Quantity:  1,
 			}
+			database.DB.Create(&cart)
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find product"})
+			return
 		}
+	} else {
+		cart.Quantity++
+		database.DB.Save(&cart)
 	}
+	c.JSON(http.StatusOK, gin.H{"message":"product added successfully"})
+}
+
+func Deletecart(c *gin.Context){
+	userID := c.GetUint("userid")
+	idStr := c.Param("ID")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil{
+		c.JSON(http.StatusBadRequest, gin.H{"error":"failed to convert"})
+		return
+	}
+	var cart model.Cart
+	result := database.DB.Where("user_id=? AND productId=?", userID,id).First(&cart)
+	if result.Error != nil{
+		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to find product"})
+		return
+	}
+	
+	delete := database.DB.Delete(&result)
+	if delete.Error != nil{
+		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to delete product from cart"})
+		return
+	} else{
+		c.JSON(http.StatusOK, gin.H{"message":"successfully deleted product from the cart"})
+	}
+}

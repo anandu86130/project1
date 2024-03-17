@@ -56,7 +56,7 @@ type Cart struct {
 	Id        uint
 	UserID    uint `gorm:"user_id"`
 	User      UserModel
-	ProductId int
+	ProductId uint
 	Product   Product `gorm:"foreignKey:ProductId"`
 	Quantity  uint
 }
