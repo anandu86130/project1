@@ -20,7 +20,7 @@ func DBconnect() {
 	}
 	DB = db
 
-	err = DB.AutoMigrate(&model.Cart{}, &model.UserModel{}, &model.OTP{}, &model.AdminModel{}, &model.Category{}, &model.Product{}, &model.Address{})
+	err = DB.AutoMigrate(&model.UserModel{}, &model.OTP{}, &model.AdminModel{}, &model.Category{}, &model.Product{}, &model.Address{}, &model.Cart{})
 	if err != nil {
 		log.Fatal("failed to auto migrate", err)
 	}

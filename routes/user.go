@@ -46,15 +46,15 @@ func Signup(c *gin.Context) {
 		Otp:   otp,
 		Exp:   time.Now().Add(1 * time.Minute),
 	}
+	fmt.Println(otp)
 	if err := database.DB.Where("email = ?", Userdetails.Email).First(&existinguser); err.Error != nil {
 		database.DB.Model(&Userdetails).Updates(model.OTP{
 			Otp: otp,
 		})
-	} else {
-		if err := database.DB.Create(&newOTP).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, "failed to generate otp")
-			return
-		}
+	}
+	if err := database.DB.Create(&newOTP).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, "failed to generate otp")
+		return
 	}
 
 	send.SendOTPByEmail(newOTP.Email, newOTP.Otp)

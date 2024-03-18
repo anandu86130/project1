@@ -55,11 +55,11 @@ type Product struct {
 
 type Cart struct {
 	gorm.Model
-	UserID    uint      `json:"user_id"`
-	UserModel UserModel `gorm:"foreignKey:UserID"`
-	ProductID uint      `json:"product_id"`
-	Product   Product   `gorm:"foreignKey:ProductID"`
-	Quantity  uint      `json:"quantity"`
+	User      UserModel
+	UserID    uint `json:"user_id"`
+	Product   Product
+	ProductID uint `json:"product_id"`
+	Quantity  uint `json:"quantity"`
 }
 
 type AdminModel struct {

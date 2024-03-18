@@ -1,14 +1,13 @@
 package routes
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"project1/database"
 	"project1/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func CartView(c *gin.Context) {
@@ -53,20 +52,21 @@ func Addtocart(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to convert"})
 		return
 	}
+
 	var cart model.Cart
 	result := database.DB.Where("user_id = ? AND Product_id = ?", userID, id).First(&cart)
 	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			cart = model.Cart{
-				UserID:    userID,
-				ProductID: uint(id),
-				Quantity:  1,
-			}
-			err := database.DB.Create(&cart)
-			if err.Error != nil{
-				c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to save to cart"})
-				return
-			}
+		cart = model.Cart{
+			UserID:    userID,
+			ProductID: uint(id),
+			Quantity:  1,
+		}
+		fmt.Println("userid===========================================================================================", userID)
+		fmt.Println("productid===========================================================================================", id)
+		err := database.DB.Create(&cart)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save to cart"})
+			return
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find product"})
 			return
@@ -75,6 +75,8 @@ func Addtocart(c *gin.Context) {
 		cart.Quantity++
 		database.DB.Save(&cart)
 	}
+	fmt.Println("userid===========================================================================================", userID)
+	fmt.Println("productid===========================================================================================", id)
 	c.JSON(http.StatusOK, gin.H{"message": "product added successfully"})
 }
 
