@@ -59,10 +59,14 @@ func Addtocart(c *gin.Context) {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			cart = model.Cart{
 				UserID:    userID,
-				ProductId: uint(id),
+				ProductID: uint(id),
 				Quantity:  1,
 			}
-			database.DB.Create(&cart)
+			err := database.DB.Create(&cart)
+			if err.Error != nil{
+				c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to save to cart"})
+				return
+			}
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find product"})
 			return
