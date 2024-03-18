@@ -152,8 +152,8 @@ func Login(c *gin.Context) {
 	}
 
 	var existinguser model.UserModel
-	email := database.DB.Where("email=?", userlogin.Email).First(&existinguser)
-	if email.Error != nil {
+	result := database.DB.Where("email=?", userlogin.Email).First(&existinguser)
+	if result.Error != nil {
 		c.JSON(http.StatusUnauthorized, "incorrect email or password")
 		return
 	}
@@ -164,7 +164,7 @@ func Login(c *gin.Context) {
 		return
 	} else {
 		if existinguser.Status {
-			jwt.JwtToken(c, userlogin.UserID, userlogin.Email, RoleUser)
+			jwt.JwtToken(c, existinguser.UserID, userlogin.Email, RoleUser)
 			c.JSON(http.StatusOK, "Login successfully")
 		} else {
 			c.JSON(http.StatusUnauthorized, "blocked user")
