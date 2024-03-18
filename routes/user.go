@@ -46,7 +46,7 @@ func Signup(c *gin.Context) {
 		Otp:   otp,
 		Exp:   time.Now().Add(1 * time.Minute),
 	}
-	if err := database.DB.Where("email = ?", Userdetails.Email).First(&existinguser); err.Error == nil {
+	if err := database.DB.Where("email = ?", Userdetails.Email).First(&existinguser); err.Error != nil {
 		database.DB.Model(&Userdetails).Updates(model.OTP{
 			Otp: otp,
 		})
@@ -115,98 +115,6 @@ func Otpsignup(c *gin.Context) {
 // 	c.JSON(http.StatusOK, users)
 // }
 
-func AddAddress(c *gin.Context) {
-	// user, _ := c.Get("ID")
-	// userID := user.(model.UserModel).ID
-
-	var address model.Address
-	err := c.BindJSON(&address)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed to bind")
-		return
-	}
-
-	var dbaddress model.Address
-	// dbaddress.User_ID = userID
-	database.DB.Where("address=?", address.Address).First(&dbaddress)
-
-	// if dbaddress.ID != 0 && address.Address == dbaddress.Address {
-	// 	c.JSON(http.StatusConflict, "this address already exists")
-	// 	return
-	// }
-
-	if len(address.Pincode) != 6 {
-		c.JSON(http.StatusInternalServerError, "invalid pincode")
-		return
-	}
-
-	create := database.DB.Create(&model.Address{
-		Address:  address.Address,
-		City:     address.City,
-		Landmark: address.Landmark,
-		State:    address.State,
-		Country:  address.Country,
-		Pincode:  address.Pincode,
-		// User_ID:  address.User_ID,
-	})
-	if create.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to create address")
-		return
-	}
-
-	c.JSON(http.StatusOK, "Address added successfully")
-}
-
-func EditAddress(c *gin.Context) {
-	var address model.Address
-	err := c.BindJSON(&address)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed to bind")
-		return
-	}
-
-	addressID := c.Param("ID")
-
-	var dbaddress model.Address
-	result := database.DB.Where("id=?", addressID).First(&dbaddress)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, "address not found")
-		return
-	}
-
-	dbaddress.Address = address.Address
-	dbaddress.City = address.City
-	dbaddress.Country = address.City
-	dbaddress.Landmark = address.Landmark
-	dbaddress.Pincode = address.Pincode
-	dbaddress.State = address.State
-
-	update := database.DB.Save(&dbaddress)
-	if update.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to update address")
-		return
-	}
-
-	c.JSON(http.StatusOK, "address updated successfully")
-}
-
-func Deleteaddress(c *gin.Context) {
-	addressID := c.Param("ID")
-	var dbaddress model.Address
-	result := database.DB.Where("id=?", addressID).First(&dbaddress)
-	if result.Error != nil {
-		c.JSON(http.StatusNotFound, "address not found")
-		return
-	}
-	delete := database.DB.Delete(&dbaddress)
-	if delete.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to delete address")
-		return
-	}
-
-	c.JSON(http.StatusOK, "address deleted successfully")
-}
-
 func ResendOtp(c *gin.Context) {
 	var fetch model.OTP
 	err := c.BindJSON(&fetch)
@@ -256,7 +164,7 @@ func Login(c *gin.Context) {
 		return
 	} else {
 		if existinguser.Status {
-			jwt.JwtToken(c, userlogin.ID, userlogin.Email, RoleUser)
+			jwt.JwtToken(c, userlogin.UserID, userlogin.Email, RoleUser)
 			c.JSON(http.StatusOK, "Login successfully")
 		} else {
 			c.JSON(http.StatusUnauthorized, "blocked user")

@@ -17,33 +17,37 @@ func init() {
 func main() {
 	r := gin.Default()
 
-	//user
+	//user authentication
 	r.POST("/user/signup", routes.Signup)
 	r.POST("/user/otpsignup", routes.Otpsignup)
 	r.POST("/user/resendotp", routes.ResendOtp)
 	r.POST("/user/login", routes.Login)
+	//user forgotpassword
 	r.POST("user/forgotpassword",jwt.AuthMiddleware("user"), routes.Forgotpassword)
 	r.POST("/user/forgototpcheck",jwt.AuthMiddleware("user"), routes.Otpcheck)
 	r.POST("/user/resetpassword", jwt.AuthMiddleware("user"),routes.PasswordReset)
-	// r.GET("/user/profile", routes.Profile)
-	r.POST("/user/address", jwt.AuthMiddleware("user"), routes.AddAddress)
+	//user address
+	r.POST("/user/address/:ID", jwt.AuthMiddleware("user"), routes.AddAddress)
 	r.PATCH("/user/address/:ID", jwt.AuthMiddleware("user"), routes.EditAddress)
 	r.DELETE("/user/address/:ID", jwt.AuthMiddleware("user"), routes.Deleteaddress)
+	//user product
 	r.GET("/user/product", jwt.AuthMiddleware("user"), routes.Productview)
+	//user cart
 	r.GET("/user/cart", jwt.AuthMiddleware("user"),routes.CartView)
-	r.POST("/user/cart/:ID", routes.Addtocart)
-	r.DELETE("/user/cart/:ID", routes.Deletecart)
+	r.POST("/user/cart/:ID",jwt.AuthMiddleware("user"), routes.Addtocart)
+	r.DELETE("/user/cart/:ID", jwt.AuthMiddleware("user"),routes.Deletecart)
 
-	//admin
+	//admin authentucation
 	r.POST("/admin/signin", routes.Signin)
+	// admin user management
 	r.GET("/admin/getuser", jwt.AuthMiddleware("admin"), routes.Getuser)
 	r.PATCH("/admin/blockuser/:ID", jwt.AuthMiddleware("admin"), routes.Blockuser)
-	//category
+	//admin category management
 	r.GET("/admin/category", jwt.AuthMiddleware("admin"), routes.Category)
 	r.POST("/admin/category", jwt.AuthMiddleware("admin"), routes.Addcategory)
 	r.PATCH("/admin/category/:ID", jwt.AuthMiddleware("admin"), routes.Editcategory)
 	r.DELETE("/admin/category/:ID", jwt.AuthMiddleware("admin"), routes.Deletecategory)
-	//product
+	//admin product mangement
 	r.GET("/admin/product", jwt.AuthMiddleware("admin"), routes.Aproduct)
 	r.POST("/admin/product", jwt.AuthMiddleware("admin"), routes.Addproduct)
 	r.POST("/admin/upload", jwt.AuthMiddleware("admin"), routes.Upload)

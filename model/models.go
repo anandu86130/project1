@@ -7,7 +7,7 @@ import (
 )
 
 type UserModel struct {
-	ID       uint   `gorm:"primaryKey;autoIncrement" json:"id"`
+	UserID   uint   `gorm:"primaryKey;autoIncrement" json:"user_id"`
 	Name     string `json:"name" gorm:"not null"`
 	Email    string `gorm:"unique;not null" json:"email"`
 	Password string `json:"password" gorm:"not null"`
@@ -22,6 +22,7 @@ type OTP struct {
 }
 
 type Address struct {
+	AddressId uint `json:"address_id" gorm:"primaryKey;autoIncrement"`
 	Address  string `json:"address" gorm:"not null;unique"`
 	City     string `json:"city" gorm:"not null"`
 	Landmark string `json:"landmark" gorm:"not null"`
@@ -53,11 +54,11 @@ type Product struct {
 }
 
 type Cart struct {
-	Id        uint
+	gorm.Model
 	UserID    uint `gorm:"user_id"`
 	User      UserModel
-	ProductId uint
-	Product   Product `gorm:"foreignKey:ProductId"`
+	ProductId uint `gorm:"product_id"`
+	Product   Product
 	Quantity  uint
 }
 

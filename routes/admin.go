@@ -49,7 +49,7 @@ func Getuser(c *gin.Context) {
 	var responseData []gin.H
 	for _, user := range users {
 		userdata := gin.H{
-			"id":    user.ID,
+			"id":    user.UserID,
 			"name":  user.Name,
 			"email": user.Email,
 		}
