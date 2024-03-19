@@ -62,6 +62,18 @@ type Cart struct {
 	Quantity  uint `json:"quantity"`
 }
 
+type Checkout struct {
+	gorm.Model
+	User          UserModel
+	UserID        uint `json:"user_id"`
+	Product       Product
+	ProductID     uint `json:"product_id"`
+	Totalamount   uint
+	Paymentmethod string
+	Address       Address
+	AddressId     uint `json:"address_id"`
+}
+
 type AdminModel struct {
 	gorm.Model
 	ID       uint   `gorm:"primaryKey" json:"id"`
