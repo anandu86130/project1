@@ -25,7 +25,7 @@ func CartView(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"product name":     val.Product.Product_name,
 			"product image":    val.Product.ImagePath1,
-			"product quantity": val.Product.Quantity,
+			"product quantity": val.Quantity,
 			"product price":    val.Product.Price,
 			"product id":       val.Product.ID,
 		})

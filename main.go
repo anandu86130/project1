@@ -22,10 +22,12 @@ func main() {
 	r.POST("/user/otpsignup", routes.Otpsignup)
 	r.POST("/user/resendotp", routes.ResendOtp)
 	r.POST("/user/login", routes.Login)
+	//user profile
+	r.GET("/user/profile", routes.UserProfile)
 	//user forgotpassword
-	r.POST("user/forgotpassword",jwt.AuthMiddleware("user"), routes.Forgotpassword)
-	r.POST("/user/forgototpcheck",jwt.AuthMiddleware("user"), routes.Otpcheck)
-	r.POST("/user/resetpassword", jwt.AuthMiddleware("user"),routes.PasswordReset)
+	r.POST("user/forgotpassword", routes.Forgotpassword)
+	r.POST("/user/forgototpcheck", routes.Otpcheck)
+	r.POST("/user/resetpassword", routes.PasswordReset)
 	//user address
 	r.POST("/user/address/:ID", jwt.AuthMiddleware("user"), routes.AddAddress)
 	r.PATCH("/user/address/:ID", jwt.AuthMiddleware("user"), routes.EditAddress)
@@ -33,9 +35,9 @@ func main() {
 	//user product
 	r.GET("/user/product", jwt.AuthMiddleware("user"), routes.Productview)
 	//user cart
-	r.GET("/user/cart", jwt.AuthMiddleware("user"),routes.CartView)
-	r.POST("/user/cart/:ID",jwt.AuthMiddleware("user"), routes.Addtocart)
-	r.DELETE("/user/cart/:ID", jwt.AuthMiddleware("user"),routes.Deletecart)
+	r.GET("/user/cart", jwt.AuthMiddleware("user"), routes.CartView)
+	r.POST("/user/cart/:ID", jwt.AuthMiddleware("user"), routes.Addtocart)
+	r.DELETE("/user/cart/:ID", jwt.AuthMiddleware("user"), routes.Deletecart)
 
 	//admin authentucation
 	r.POST("/admin/signin", routes.Signin)
