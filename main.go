@@ -23,7 +23,7 @@ func main() {
 	r.POST("/user/resendotp", routes.ResendOtp)
 	r.POST("/user/login", routes.Login)
 	//user profile
-	r.GET("/user/profile", routes.UserProfile)
+	r.GET("/user/profile", jwt.AuthMiddleware("user"), routes.UserProfile)
 	//user forgotpassword
 	r.POST("user/forgotpassword", routes.Forgotpassword)
 	r.POST("/user/forgototpcheck", routes.Otpcheck)
