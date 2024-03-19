@@ -13,7 +13,8 @@ func Checkout(c *gin.Context) {
 	var cart model.Cart
 	result := database.DB.Where("user_id=?", userid).First(&cart)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to find user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find user"})
 		return
-	}	
+	}
+	
 }

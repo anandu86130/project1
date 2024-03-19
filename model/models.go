@@ -62,7 +62,7 @@ type Cart struct {
 	Quantity  uint `json:"quantity"`
 }
 
-type Checkout struct {
+type Order struct {
 	gorm.Model
 	User          UserModel
 	UserID        uint `json:"user_id"`
