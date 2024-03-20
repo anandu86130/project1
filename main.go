@@ -60,6 +60,7 @@ func main() {
 	//admin coupon
 	r.GET("/admin/coupon", jwt.AuthMiddleware("admin"),routes.Coupon)
 	r.POST("admin/coupon", jwt.AuthMiddleware("admin"), routes.Addcoupon)
+	r.DELETE("admin/coupon/:ID", jwt.AuthMiddleware("admin"), routes.Deletecoupon)
 
 	r.Run(":8080")
 }
