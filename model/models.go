@@ -68,6 +68,8 @@ type Order struct {
 	UserID        uint `json:"user_id"`
 	Product       Product
 	ProductID     uint `json:"product_id"`
+	Totalquantity uint
+	Price         uint
 	Totalamount   uint
 	Paymentmethod string
 	Address       Address
