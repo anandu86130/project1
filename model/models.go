@@ -53,6 +53,13 @@ type Product struct {
 	DeletedAt    *time.Time `gorm:"index"`
 }
 
+type Coupon struct {
+	gorm.Model
+	Code      string
+	Discount  float64
+	ValidTo   time.Time
+}
+
 type Cart struct {
 	gorm.Model
 	User      UserModel

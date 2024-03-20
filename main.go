@@ -57,6 +57,9 @@ func main() {
 	r.POST("/admin/upload", jwt.AuthMiddleware("admin"), routes.Upload)
 	r.PATCH("/admin/product/:ID", jwt.AuthMiddleware("admin"), routes.Editproduct)
 	r.DELETE("/admin/product/:ID", jwt.AuthMiddleware("admin"), routes.Deleteproduct)
+	//admin coupon
+	r.GET("/admin/coupon", jwt.AuthMiddleware("admin"),routes.Coupon)
+	r.POST("admin/coupon", jwt.AuthMiddleware("admin"), routes.Addcoupon)
 
 	r.Run(":8080")
 }

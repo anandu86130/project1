@@ -27,6 +27,11 @@ func Checkout(c *gin.Context) {
 		totalquantity += cartitem.Quantity
 		productid = cartitem.ProductID
 		Productprice = cartitem.Product.Price
+
+		if err := database.DB.Model(&cartitem.Product).Update("quantity", cartitem.Product.Quantity-cartitem.Quantity).Error; err != nil {
+			c.JSON(http.StatusOK, gin.H{"error": "failed to update quantity"})
+			return
+		}
 	}
 	addressIDStr := c.Param("address_id")
 	addressID, err := strconv.ParseUint(addressIDStr, 10, 64)
