@@ -22,7 +22,7 @@ func Addcoupon(c *gin.Context) {
 	if result := database.DB.Create(&coupon).Error; result != nil {
 		c.JSON(http.StatusOK, gin.H{"error": "failed to create coupon"})
 		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "coupon created successfully"})
+	}else{
+		c.JSON(http.StatusOK, gin.H{"message": "coupon created successfully"})
+}
 }
