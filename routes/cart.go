@@ -63,12 +63,8 @@ func Addtocart(c *gin.Context) {
 		}
 		fmt.Println("userid===========================================================================================", userID)
 		fmt.Println("productid===========================================================================================", id)
-		err := database.DB.Create(&cart)
-		if err != nil {
+		if err := database.DB.Create(&cart).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save to cart"})
-			return
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find product"})
 			return
 		}
 	} else {
@@ -89,13 +85,13 @@ func Deletecart(c *gin.Context) {
 		return
 	}
 	var cart model.Cart
-	result := database.DB.Where("user_id=? AND productId=?", userID, id).First(&cart)
+	result := database.DB.Where("user_id=? AND product_id=?", userID, id).First(&cart)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find product"})
 		return
 	}
 
-	delete := database.DB.Delete(&result)
+	delete := database.DB.Delete(&cart)
 	if delete.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete product from cart"})
 		return

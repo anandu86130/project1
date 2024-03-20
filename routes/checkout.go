@@ -20,15 +20,15 @@ func Checkout(c *gin.Context) {
 	var totalamount uint
 	var totalquantity uint
 	var productid uint
-	var price uint
+	var Productprice uint
 	for _, cartitem := range cart {
 		price := cartitem.Quantity * cartitem.Product.Price
 		totalamount += price
 		totalquantity += cartitem.Quantity
 		productid = cartitem.ProductID
-		price = cartitem.Product.Price
+		Productprice = cartitem.Product.Price
 	}
-	addressIDStr := c.PostForm("address_id")
+	addressIDStr := c.Param("address_id")
 	addressID, err := strconv.ParseUint(addressIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid addressid"})
@@ -38,7 +38,7 @@ func Checkout(c *gin.Context) {
 		UserID:        userid,
 		ProductID:     productid,
 		Totalamount:   totalamount,
-		Price:         price,
+		Price:         Productprice,
 		Totalquantity: totalquantity,
 		Paymentmethod: "COD",
 		AddressId:     uint(addressID),
@@ -48,4 +48,14 @@ func Checkout(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create order"})
 		return
 	}
+
+	if err := database.DB.Delete(&cart).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to clear cart"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":     "order placed successfully",
+		"Totalamount": totalamount,
+	})
 }
