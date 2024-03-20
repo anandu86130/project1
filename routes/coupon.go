@@ -23,5 +23,6 @@ func Addcoupon(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"error": "failed to create coupon"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message":"coupon created successfully"})
+
+	c.JSON(http.StatusOK, gin.H{"message": "coupon created successfully"})
 }

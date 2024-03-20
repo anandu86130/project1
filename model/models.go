@@ -55,9 +55,10 @@ type Product struct {
 
 type Coupon struct {
 	gorm.Model
-	Code      string
-	Discount  float64
-	ValidTo   time.Time
+	Code      string    `json:"code"`
+	Discount  float64   `json:"discount"`
+	ValidFrom time.Time `json:"validfrom"`
+	ValidTo   time.Time `json:"validto"`
 }
 
 type Cart struct {
