@@ -39,6 +39,7 @@ func Checkout(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid addressid"})
 		return
 	}
+
 	order := model.Order{
 		UserID:        userid,
 		ProductID:     productid,
@@ -59,6 +60,10 @@ func Checkout(c *gin.Context) {
 		return
 	}
 
+	couponcode := c.Request.FormValue("code")
+	if couponcode != ""{
+		
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"message":     "order placed successfully",
 		"Totalamount": totalamount,
