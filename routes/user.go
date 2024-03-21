@@ -196,3 +196,19 @@ func Productview(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, productview)
 }
+
+func Logout(c *gin.Context) {
+	tokenstring := c.GetHeader("Authorization")
+	if tokenstring == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "token not found"})
+		return
+	}
+
+	jwt.Userdetails = model.UserModel{}
+	jwt.BlacklistedToken[tokenstring] = true
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "successfully logout",
+		"blacklist": jwt.BlacklistedToken[tokenstring],
+	})
+}

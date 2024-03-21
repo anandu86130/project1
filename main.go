@@ -40,6 +40,12 @@ func main() {
 	r.DELETE("/user/cart/:ID", jwt.AuthMiddleware("user"), routes.Deletecart)
 	//user checkout
 	r.POST("user/checkout/:address_id", jwt.AuthMiddleware("user"), routes.Checkout)
+	//user order
+	r.GET("/user/order", jwt.AuthMiddleware("user"), routes.Orderview)
+	r.POST("user/order/:ID", jwt.AuthMiddleware("user"), routes.Orderdetails)
+	// r.DELETE("user/order", jwt.AuthMiddleware("user"), routes.Cancelorder)
+	//user logout
+	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 
 	//admin authentucation
 	r.POST("/admin/signin", routes.Signin)
@@ -58,9 +64,11 @@ func main() {
 	r.PATCH("/admin/product/:ID", jwt.AuthMiddleware("admin"), routes.Editproduct)
 	r.DELETE("/admin/product/:ID", jwt.AuthMiddleware("admin"), routes.Deleteproduct)
 	//admin coupon
-	r.GET("/admin/coupon", jwt.AuthMiddleware("admin"),routes.Coupon)
+	r.GET("/admin/coupon", jwt.AuthMiddleware("admin"), routes.Coupon)
 	r.POST("admin/coupon", jwt.AuthMiddleware("admin"), routes.Addcoupon)
 	r.DELETE("admin/coupon/:ID", jwt.AuthMiddleware("admin"), routes.Deletecoupon)
+	//admin logout
+	r.GET("admin/logout", jwt.AuthMiddleware("admin"), routes.AdminLogout)
 
 	r.Run(":8080")
 }

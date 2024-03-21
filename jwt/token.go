@@ -3,6 +3,7 @@ package jwt
 import (
 	"fmt"
 	"net/http"
+	"project1/model"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -10,7 +11,8 @@ import (
 )
 
 var SecretKey = []byte("qwertuiouplkhgfdsazxcvbnm")
-var BlacklistedTokens = make(map[string]bool)
+var Userdetails model.UserModel
+var BlacklistedToken = make(map[string]bool)
 
 type Claims struct {
 	ID    uint
@@ -61,8 +63,8 @@ func AuthMiddleware(requiredRole string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		if BlacklistedTokens[tokenstring] {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Token revoked"})
+		if BlacklistedToken[tokenstring] {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Token removed"})
 			c.Abort()
 			return
 		}

@@ -42,7 +42,8 @@ type Category struct {
 
 type Product struct {
 	gorm.Model
-	Product_name string     `json:"name"`
+	Product_name string     `json:"name" gorm:"unique"`
+	CategoryID   int        `json:"categoryid"`
 	ImagePath1   string     `json:"imagepath1"`
 	ImagePath2   string     `json:"imagepath2"`
 	ImagePath3   string     `json:"imagepath3"`
@@ -76,12 +77,27 @@ type Order struct {
 	UserID        uint `json:"user_id"`
 	Product       Product
 	ProductID     uint `json:"product_id"`
+	CouponId      uint
+	Code          string
 	Totalquantity uint
 	Price         uint
 	Totalamount   uint
 	Paymentmethod string
 	Address       Address
 	AddressId     uint `json:"address_id"`
+	Orderdate     time.Time
+}
+
+type Orderitems struct {
+	gorm.Model
+	Order             Order
+	OrderID           uint `json:"order_id"`
+	Product           Product
+	ProductID         uint
+	Quantity          uint
+	Subtotal          uint
+	Orderstatus       string
+	Ordercancelreason string
 }
 
 type AdminModel struct {

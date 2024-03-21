@@ -34,7 +34,7 @@ func UserProfile(c *gin.Context) {
 	}
 	var address []model.Address
 	var Addressshow []UserAddress
-	err := database.DB.Where("user_id", userid).First(&address)
+	err := database.DB.Where("user_id", userid).Find(&address)
 	fmt.Println("addresssssssssssss================================================================", userid)
 	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find user"})

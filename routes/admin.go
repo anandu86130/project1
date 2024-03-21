@@ -290,3 +290,16 @@ func Deleteproduct(c *gin.Context) {
 		c.JSON(http.StatusOK, "product deleted succcessfully")
 	}
 }
+
+func AdminLogout(c *gin.Context) {
+	tokenstring := c.GetHeader("Authorization")
+	if tokenstring == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "token not provided"})
+		return
+	}
+	jwt.BlacklistedToken[tokenstring] = true
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "admin logout successfully",
+		"blacklist": jwt.BlacklistedToken[tokenstring],
+	})
+}
