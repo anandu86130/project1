@@ -39,7 +39,7 @@ func main() {
 	r.POST("/user/cart/:ID", jwt.AuthMiddleware("user"), routes.Addtocart)
 	r.DELETE("/user/cart/:ID", jwt.AuthMiddleware("user"), routes.Deletecart)
 	//user checkout
-	r.POST("user/checkout/:address_id", jwt.AuthMiddleware("user"), routes.Checkout)
+	r.POST("user/checkout/:ID", jwt.AuthMiddleware("user"), routes.Checkout)
 	//user order
 	r.GET("/user/order", jwt.AuthMiddleware("user"), routes.Orderview)
 	r.POST("user/order/:ID", jwt.AuthMiddleware("user"), routes.Orderdetails)

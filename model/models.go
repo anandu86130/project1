@@ -75,12 +75,9 @@ type Order struct {
 	gorm.Model
 	User          UserModel
 	UserID        uint `json:"user_id"`
-	Product       Product
-	ProductID     uint `json:"product_id"`
 	CouponId      uint
 	Code          string
 	Totalquantity uint
-	Price         uint
 	Totalamount   uint
 	Paymentmethod string
 	Address       Address

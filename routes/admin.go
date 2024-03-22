@@ -70,6 +70,7 @@ func Category(c *gin.Context) {
 	var categories []gin.H
 	for _, categorydetails := range category {
 		fetchedcategory := gin.H{
+			"categoryid":  categorydetails.ID,
 			"name":        categorydetails.Name,
 			"description": categorydetails.Description,
 		}

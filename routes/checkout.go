@@ -18,81 +18,75 @@ func Checkout(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find user"})
 		return
 	}
-	var totalamount uint
-	var totalquantity uint
-	// var productid uint
-	var Productprice uint
-	for _, cartitem := range cart {
-		price := cartitem.Quantity * cartitem.Product.Price
-		totalamount += price
-		totalquantity += cartitem.Quantity
-		// productid = cartitem.ProductID
-		Productprice = cartitem.Product.Price
 
-		if err := database.DB.Model(&cartitem.Product).Update("quantity", cartitem.Product.Quantity-cartitem.Quantity).Error; err != nil {
-			c.JSON(http.StatusOK, gin.H{"error": "failed to update quantity"})
-			return
-		}
-	}
-
-	couponcode := c.Request.FormValue("code")
-	var coupon model.Coupon
-	if result := database.DB.Where("code=?", couponcode).First(&coupon).Error; result != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid coupon code"})
-		return
-	}
-
-	currenttime := time.Now()
-	if currenttime.Before(coupon.ValidFrom) || currenttime.After(coupon.ValidTo) {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "coupon is not valid"})
-		return
-	}
-
-	totalamount = uint(float64(totalamount) - coupon.Discount)
-
-	addressIDStr := c.Param("address_id")
+	addressIDStr := c.Param("ID")
 	addressID, err := strconv.ParseUint(addressIDStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid addressid"})
 		return
 	}
 
-	var orders []model.Order
-	for _, val := range cart {
-		order := model.Order{
-			UserID:        userid,
-			ProductID:     val.ProductID,
-			Totalamount:   totalamount,
-			CouponId:      coupon.ID,
-			Code:          coupon.Code,
-			Price:         Productprice,
-			Totalquantity: totalquantity,
-			Orderdate:     currenttime,
-			Paymentmethod: "COD",
-			AddressId:     uint(addressID),
-		}
-		orders = append(orders, order)
-
-		orderlist := model.Orderitems{
-			OrderID:           order.ID,
-			ProductID:         order.ProductID,
-			Quantity:          order.Totalquantity,
-			Subtotal:          order.Totalamount,
-			Orderstatus:       "pending",
-			Ordercancelreason: "",
+	var coupon model.Coupon
+	couponcode := c.Request.FormValue("code")
+	if couponcode != "" {
+		if result := database.DB.Where("code=?", couponcode).First(&coupon).Error; result != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid coupon code"})
+			return
 		}
 
-		if create := database.DB.Create(&orderlist).Error; create != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create orderlist"})
+		currenttime := time.Now()
+		if currenttime.Before(coupon.ValidFrom) || currenttime.After(coupon.ValidTo) {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "coupon is not valid"})
 			return
 		}
 	}
+	// var orders []model.Order
+	var orderitems []model.Orderitems
+	var totalamount uint
+	for _, cartitem := range cart {
+		totalamount += cartitem.Quantity * cartitem.Product.Price
 
-	for _, orderitem := range orders {
-		if result := database.DB.Create(&orderitem).Error; result != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create order"})
+		orderlist := model.Orderitems{
+			OrderID:           cartitem.ID,
+			ProductID:         cartitem.ProductID,
+			Quantity:          cartitem.Quantity,
+			Subtotal:          cartitem.Quantity * cartitem.Product.Price,
+			Orderstatus:       "pending",
+			Ordercancelreason: "",
+		}
+		orderitems = append(orderitems, orderlist)
+
+		if err := database.DB.Model(&cartitem.Product).Update("quantity", cartitem.Product.Quantity-cartitem.Quantity).Error; err != nil {
+			c.JSON(http.StatusOK, gin.H{"error": "failed to update quantity"})
 			return
 		}
+	}
+	currenttime := time.Now()
+
+	totalamount = uint(float64(totalamount) - coupon.Discount)
+
+	order := model.Order{
+		UserID:        userid,
+		CouponId:      coupon.ID,
+		Code:          coupon.Code,
+		Totalquantity: uint(len(cart)),
+		Totalamount:   totalamount,
+		Paymentmethod: "COD",
+		AddressId:     uint(addressID),
+		Orderdate:     currenttime,
+	}
+
+	if result := database.DB.Create(&order).Error; result != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create order"})
+		return
+	}
+
+	for i := range orderitems {
+		orderitems[i].OrderID = order.ID
+	}
+	if create := database.DB.Create(&orderitems).Error; create != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create orderlist"})
+		return
 	}
 
 	if err := database.DB.Delete(&cart).Error; err != nil {
