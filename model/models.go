@@ -73,7 +73,7 @@ type Cart struct {
 
 type Order struct {
 	gorm.Model
-	User          UserModel
+	User          UserModel 
 	UserID        uint `json:"user_id"`
 	CouponId      uint
 	Code          string

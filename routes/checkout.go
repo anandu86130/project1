@@ -103,7 +103,7 @@ func Checkout(c *gin.Context) {
 func Orderview(c *gin.Context) {
 	var order []model.Order
 	userid := c.GetUint("userid")
-	if result := database.DB.Preload("Orderitems").Find(&order).Where("user_id=?", userid).Error; result != nil {
+	if result := database.DB.Where("user_id=?", userid).Find(&order).Error; result != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find user"})
 		return
 	}
@@ -139,49 +139,51 @@ func Orderdetails(c *gin.Context) {
 	}
 }
 
-// func Cancelorder(c *gin.Context) {
-// 	var orderlist model.Orderitems
-// 	var productQuantity model.Product
-// 	orderitemid := c.Param("ID")
-// 	if orderitemid == "" {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "please give the orderid"})
-// 		return
-// 	}
-// 	reason := c.Request.FormValue("reason")
-// 	if reason == "" {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "please give the reason"})
-// 		return
-// 	}
+func Cancelorder(c *gin.Context) {
+	var orderlist model.Orderitems
+	var productQuantity model.Product
+	var order model.Order
+	orderitemid := c.Param("ID")
+	if orderitemid == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "please give the orderid"})
+		return
+	}
 
-// 	if result := database.DB.Where("order_id=?", orderitemid).First(&orderlist).Error; result != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find order"})
-// 		return
-// 	}
+	if result := database.DB.Where("order_id=?", orderitemid).First(&orderlist).Error; result != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find order"})
+		return
+	}
 
-// 	if orderlist.Orderstatus == "cancelled" {
-// 		c.JSON(http.StatusOK, gin.H{"message": "order already cancelled"})
-// 		return
-// 	}
+	reason := c.Request.FormValue("reason")
+	if reason == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "please give the reason"})
+		return
+	}
 
-// 	orderlist.Orderstatus = "cancelled"
-// 	orderlist.Ordercancelreason = reason
+	if orderlist.Orderstatus == "cancelled" {
+		c.JSON(http.StatusOK, gin.H{"message": "order already cancelled"})
+		return
+	}
 
-// 	if err := database.DB.Save(&orderlist).Error; err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update order"})
-// 		return
-// 	}
+	orderlist.Orderstatus = "cancelled"
+	orderlist.Ordercancelreason = reason
 
-// 	database.DB.First(&productQuantity, orderlist.ProductID)
-// 	productQuantity.Quantity += orderlist.Quantity
-// 	if err := database.DB.Save(&productQuantity).Error; err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add quantity"})
-// 		return
-// 	}
-// 	var orderamount model.Order
-// 	if err := database.DB.First(&orderamount, orderlist.OrderID).Error; err != nil{
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to find order details"})
-// 		return
-// 	}
-// 	var couponremove model.Coupon
-// 	if orderamount.
-// }
+	if err := database.DB.Save(&orderlist).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update order"})
+		return
+	}
+
+	database.DB.First(&productQuantity, orderlist.ProductID)
+	productQuantity.Quantity += orderlist.Quantity
+	if err := database.DB.Save(&productQuantity).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add quantity"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "order successfully cancelled"})
+
+	cancelledamount := orderlist.Subtotal
+	database.DB.Model(&order).Updates(model.Order{
+		Totalamount: order.Totalamount - uint(cancelledamount),
+	})
+}

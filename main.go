@@ -43,7 +43,7 @@ func main() {
 	//user order
 	r.GET("/user/order", jwt.AuthMiddleware("user"), routes.Orderview)
 	r.POST("user/order/:ID", jwt.AuthMiddleware("user"), routes.Orderdetails)
-	// r.DELETE("user/order", jwt.AuthMiddleware("user"), routes.Cancelorder)
+	r.PATCH("user/order/:ID", jwt.AuthMiddleware("user"), routes.Cancelorder)
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 
