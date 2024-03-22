@@ -13,7 +13,7 @@ import (
 func Checkout(c *gin.Context) {
 	userid := c.GetUint("userid")
 	var cart []model.Cart
-	result := database.DB.Preload("Product").Where("user_id=?", userid).First(&cart)
+	result := database.DB.Preload("Product").Where("user_id=?", userid).Find(&cart)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find user"})
 		return
