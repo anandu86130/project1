@@ -18,24 +18,24 @@ func Signin(c *gin.Context) {
 	var admin model.AdminModel
 	err := c.ShouldBindJSON(&admin)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed to bind")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to bind"})
 		return
 	}
 
 	var check model.AdminModel
 	user := database.DB.Where("email=?", &admin.Email).Find(&check)
 	if user.Error != nil {
-		c.JSON(http.StatusUnauthorized, "invalid email or password")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
 		return
 	}
 
 	if admin.Password != check.Password {
-		c.JSON(http.StatusUnauthorized, "invalid email or password")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
 		return
 	}
 
 	jwt.JwtToken(c, admin.ID, admin.Email, RoleAdmin)
-	c.JSON(http.StatusOK, "successfully signed in")
+	c.JSON(http.StatusOK, gin.H{"message": "successfully signed in"})
 
 }
 
@@ -43,7 +43,7 @@ func Getuser(c *gin.Context) {
 	var users []model.UserModel
 	result := database.DB.Find(&users)
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, "cant load user")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "cant load user"})
 		return
 	}
 	var responseData []gin.H
@@ -63,7 +63,7 @@ func Category(c *gin.Context) {
 	var category []model.Category
 	result := database.DB.Find(&category)
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, "failed to load category")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to load category"})
 		return
 	}
 
@@ -83,30 +83,30 @@ func Addcategory(c *gin.Context) {
 	var category model.Category
 	err := c.BindJSON(&category)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed to bind category")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to bind category"})
 		return
 	}
 	var dbcat model.Category
 	database.DB.Where("name = ?", category.Name).First(&dbcat)
 	if dbcat.Name == category.Name {
-		c.JSON(http.StatusConflict, "this category already exists")
+		c.JSON(http.StatusConflict, gin.H{"error": "this category already exists"})
 		return
 	}
 
 	create := database.DB.Create(&category)
 	if create.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to create category")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create category"})
 		return
 	}
 
-	c.JSON(http.StatusOK, "category created successfully")
+	c.JSON(http.StatusOK, gin.H{"message": "category created successfully"})
 }
 
 func Aproduct(c *gin.Context) {
 	var product []model.Product
 	result := database.DB.Find(&product)
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, "failed to connect products")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to connect products"})
 		return
 	}
 	var products []gin.H
@@ -129,28 +129,28 @@ func Aproduct(c *gin.Context) {
 func Addproduct(c *gin.Context) {
 	err := c.BindJSON(&Product)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed to bind")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to bind"})
 		return
 	}
 	var dbproduct model.Product
 	result := database.DB.Where("product_name=?", Product.Product_name).Find(&dbproduct)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to fetch product name")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch product name"})
 		return
 	}
 
 	if dbproduct.Product_name == Product.Product_name {
-		c.JSON(http.StatusConflict, "this product already exists")
+		c.JSON(http.StatusConflict, gin.H{"error": "this product already exists"})
 		return
 	}
 
-	c.JSON(http.StatusOK, "please upload image")
+	c.JSON(http.StatusOK, gin.H{"message": "please upload image"})
 }
 
 func Upload(c *gin.Context) {
 	file, err := c.MultipartForm()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed to fetch images")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to fetch images"})
 		return
 	}
 
@@ -158,22 +158,17 @@ func Upload(c *gin.Context) {
 	var imagepaths []string
 
 	if len(files) == 0 {
-		c.JSON(http.StatusBadRequest, "no images uploaded")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no images uploaded"})
 		return
 	}
 
 	for _, val := range files {
 		filepath := "./images/" + val.Filename
 		if err := c.SaveUploadedFile(val, filepath); err != nil {
-			c.JSON(http.StatusBadRequest, "failed to upload image")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to upload image"})
 			return
 		}
 		imagepaths = append(imagepaths, filepath)
-	}
-
-	if len(imagepaths) < 3 {
-		c.JSON(http.StatusBadRequest, "please upload at least three images")
-		return
 	}
 
 	Product.ImagePath1 = imagepaths[0]
@@ -181,17 +176,17 @@ func Upload(c *gin.Context) {
 	Product.ImagePath3 = imagepaths[2]
 
 	if len(imagepaths) < 3 {
-		c.JSON(http.StatusBadRequest, "please upload at least three images")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "please upload at least three images"})
 		return
 	}
 
 	upload := database.DB.Create(&Product)
 	if upload.Error != nil {
-		c.JSON(http.StatusBadRequest, "product already exists")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "product already exists"})
 		return
 	}
 	Product = model.Product{}
-	c.JSON(http.StatusOK, "product created successfully")
+	c.JSON(http.StatusOK, gin.H{"message": "product created successfully"})
 }
 
 func Blockuser(c *gin.Context) {
@@ -199,16 +194,16 @@ func Blockuser(c *gin.Context) {
 	id := c.Param("ID")
 	result := database.DB.First(&user, id)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to fetch id")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch id"})
 		return
 	}
 
 	if user.Status {
 		database.DB.Model(&user).Update("status", false)
-		c.JSON(http.StatusOK, "User Blocked")
+		c.JSON(http.StatusOK, gin.H{"message": "User Blocked"})
 	} else {
 		database.DB.Model(&user).Update("status", true)
-		c.JSON(http.StatusOK, "User Unblocked")
+		c.JSON(http.StatusOK, gin.H{"error": "User Unblocked"})
 	}
 }
 
@@ -217,21 +212,21 @@ func Editcategory(c *gin.Context) {
 	id := c.Param("ID")
 	result := c.BindJSON(&edit)
 	if result != nil {
-		c.JSON(http.StatusBadRequest, "failed to bind")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to bind"})
 		return
 	}
 	var editcategory model.Category
 	fetch := database.DB.First(&editcategory, id)
 	if fetch.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to fetch category")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch category"})
 		return
 	}
 
 	if fetch.RowsAffected > 0 {
 		database.DB.Model(&editcategory).Updates(edit)
-		c.JSON(http.StatusOK, "category updated successfully")
+		c.JSON(http.StatusOK, gin.H{"message": "category updated successfully"})
 	} else {
-		c.JSON(http.StatusInternalServerError, "failed to update category")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update category"})
 	}
 }
 
@@ -240,21 +235,21 @@ func Editproduct(c *gin.Context) {
 	id := c.Param("ID")
 	err := c.BindJSON(&edit)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, "failed to bind")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to bind"})
 		return
 	}
 	var editproduct model.Product
 	fetch := database.DB.First(&editproduct, id)
 	if fetch.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to fetch product")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch product"})
 		return
 	}
 
 	if fetch.RowsAffected > 0 {
 		database.DB.Model(&editproduct).Updates(edit)
-		c.JSON(http.StatusOK, "product updated successfully")
+		c.JSON(http.StatusOK, gin.H{"message": "product updated successfully"})
 	} else {
-		c.JSON(http.StatusInternalServerError, "failed to update product")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update product"})
 	}
 }
 
@@ -263,15 +258,15 @@ func Deletecategory(c *gin.Context) {
 	id := c.Param("ID")
 	err := database.DB.First(&delete, id)
 	if err.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to fetch")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch"})
 		return
 	}
 	fetch := database.DB.Model(&delete).Update("DeletedAt", time.Now())
 	if fetch.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to delete category")
+		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to delete category"})
 		return
 	} else {
-		c.JSON(http.StatusOK, "category deleted successfully")
+		c.JSON(http.StatusOK, gin.H{"message":"category deleted successfully"})
 	}
 }
 
@@ -280,15 +275,15 @@ func Deleteproduct(c *gin.Context) {
 	id := c.Param("ID")
 	err := database.DB.First(&delete, id)
 	if err.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to fetch")
+		c.JSON(http.StatusInternalServerError, gin.H{"erro":"failed to fetch"})
 		return
 	}
 	fetch := database.DB.Model(&delete).Update("DeletedAt", time.Now())
 	if fetch.Error != nil {
-		c.JSON(http.StatusInternalServerError, "failed to delete product")
+		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to delete product"})
 		return
 	} else {
-		c.JSON(http.StatusOK, "product deleted succcessfully")
+		c.JSON(http.StatusOK, gin.H{"message":"product deleted succcessfully"})
 	}
 }
 
