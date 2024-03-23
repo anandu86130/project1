@@ -93,7 +93,7 @@ type Orderitems struct {
 	ProductID         uint
 	Quantity          uint
 	Subtotal          uint
-	Orderstatus       string
+	Orderstatus       string `json:"orderstatus"`
 	Ordercancelreason string
 }
 

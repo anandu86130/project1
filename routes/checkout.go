@@ -149,11 +149,16 @@ func Cancelorder(c *gin.Context) {
 		return
 	}
 
-	if result := database.DB.Where("order_id=?", orderitemid).First(&orderlist).Error; result != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find order"})
+	orderID, err := strconv.ParseUint(orderitemid, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid order ID"})
 		return
 	}
 
+	if result := database.DB.First(&orderlist, orderID).Error; result != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find order"})
+		return
+	}
 	reason := c.Request.FormValue("reason")
 	if reason == "" {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "please give the reason"})
@@ -186,4 +191,5 @@ func Cancelorder(c *gin.Context) {
 	database.DB.Model(&order).Updates(model.Order{
 		Totalamount: order.Totalamount - uint(cancelledamount),
 	})
+
 }
