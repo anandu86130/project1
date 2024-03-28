@@ -1,9 +1,11 @@
 package main
 
 import (
+	"net/http"
 	"project1/database"
 	"project1/helper"
 	"project1/jwt"
+	"project1/payment"
 	"project1/routes"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +18,7 @@ func init() {
 
 func main() {
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
 
 	//user authentication
 	r.POST("/user/signup", routes.Signup)
@@ -34,6 +37,8 @@ func main() {
 	r.DELETE("/user/address/:ID", jwt.AuthMiddleware("user"), routes.Deleteaddress)
 	//user product
 	r.GET("/user/product", jwt.AuthMiddleware("user"), routes.Productview)
+	//user productsearch
+	r.POST("/user/search", jwt.AuthMiddleware("user"), routes.Productsearch)
 	//user cart
 	r.GET("/user/cart", jwt.AuthMiddleware("user"), routes.CartView)
 	r.POST("/user/cart/:ID", jwt.AuthMiddleware("user"), routes.Addtocart)
@@ -42,8 +47,16 @@ func main() {
 	r.POST("user/checkout/:ID", jwt.AuthMiddleware("user"), routes.Checkout)
 	//user order
 	r.GET("/user/order", jwt.AuthMiddleware("user"), routes.Orderview)
-	r.POST("user/order/:ID", jwt.AuthMiddleware("user"), routes.Orderdetails)
-	r.PATCH("user/order/:ID", jwt.AuthMiddleware("user"), routes.Cancelorder)
+	r.POST("/user/order/:ID", jwt.AuthMiddleware("user"), routes.Orderdetails)
+	r.PATCH("/user/order/:ID", jwt.AuthMiddleware("user"), routes.Cancelorder)
+	//user payment
+	r.GET("/user/payment", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "payment.html", nil)
+	})
+	r.POST("/user/payment/confirm", payment.Paymentconfirmation)
+	//user whishlist
+	r.GET("/user/whishlist", jwt.AuthMiddleware("user"), routes.Whishlist)
+	r.POST("/user/whishlist/:ID", jwt.AuthMiddleware("user"), routes.Addtowhishlist)
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 

@@ -73,7 +73,7 @@ type Cart struct {
 
 type Order struct {
 	gorm.Model
-	User          UserModel 
+	User          UserModel
 	UserID        uint `json:"user_id"`
 	CouponId      uint
 	Code          string
@@ -95,6 +95,30 @@ type Orderitems struct {
 	Subtotal          uint
 	Orderstatus       string `json:"orderstatus"`
 	Ordercancelreason string
+}
+
+type Paymentdetails struct {
+	gorm.Model
+	PaymentId     string
+	OrderId       string
+	Reciept       uint
+	Paymentstatus string
+	Paymentamount int
+}
+
+type Wallet struct {
+	gorm.Model
+	UserID uint
+	User   UserModel
+	Amount float64
+}
+
+type Whishlist struct {
+	gorm.Model
+	UserID    uint
+	User      UserModel
+	ProductID uint64
+	Product   Product
 }
 
 type AdminModel struct {

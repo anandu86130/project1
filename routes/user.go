@@ -21,20 +21,20 @@ const RoleUser = "user"
 func Signup(c *gin.Context) {
 	err := c.ShouldBindJSON(&Userdetails)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"failed to bind"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to bind"})
 		return
 	}
 
 	var existinguser model.UserModel
 	result := database.DB.Where("email=?", Userdetails.Email).First(&existinguser)
 	if result.Error == nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"this user already exists"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "this user already exists"})
 		return
 	}
 
 	hashedpassword, err := bcrypt.GenerateFromPassword([]byte(Userdetails.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to hashpassword"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hashpassword"})
 		return
 	}
 	Userdetails.Password = string(hashedpassword)
@@ -53,47 +53,47 @@ func Signup(c *gin.Context) {
 		})
 	}
 	if err := database.DB.Create(&newOTP).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to generate otp"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate otp"})
 		return
 	}
 
 	send.SendOTPByEmail(newOTP.Email, newOTP.Otp)
-	c.JSON(http.StatusOK, gin.H{"message":"OTP send succcessfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "OTP send succcessfully"})
 }
 
 func Otpsignup(c *gin.Context) {
 	var otp model.OTP
 	err := c.BindJSON(&otp)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"failed to bind"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to bind"})
 		return
 	}
 
 	var existingotp model.OTP
 	result := database.DB.Where("email=?", Userdetails.Email).First(&existingotp)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to fetch otp"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch otp"})
 		return
 	}
 
 	currentTime := time.Now()
 	if currentTime.After(existingotp.Exp) {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"otp expired"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "otp expired"})
 		return
 	}
 
 	if existingotp.Otp != otp.Otp {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"invalid otp"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid otp"})
 		return
 	}
 
 	create := database.DB.Create(&Userdetails)
 	fmt.Println(Userdetails)
 	if create.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to create user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create user"})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"message":"user created successfully"})
+		c.JSON(http.StatusOK, gin.H{"message": "user created successfully"})
 	}
 }
 
@@ -101,14 +101,14 @@ func ResendOtp(c *gin.Context) {
 	var fetch model.OTP
 	err := c.BindJSON(&fetch)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to fetch email"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch email"})
 		return
 	}
 
 	var existinguser model.OTP
 	fetcheddata := database.DB.Where("email=?", fetch.Email).First(&existinguser)
 	if fetcheddata.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"email not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "email not found"})
 		return
 	}
 
@@ -116,40 +116,40 @@ func ResendOtp(c *gin.Context) {
 
 	result := database.DB.Model(&model.OTP{}).Where("email=?", fetch.Email).Updates(model.OTP{Otp: newOTP, Exp: time.Now().Add(1 * time.Minute)})
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to resend otp"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to resend otp"})
 		return
 	}
 
 	send.SendOTPByEmail(fetch.Email, newOTP)
 
-	c.JSON(http.StatusOK, gin.H{"message":"OTP resent successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "OTP resent successfully"})
 }
 
 func Login(c *gin.Context) {
 	var userlogin model.UserModel
 	err := c.ShouldBindJSON(&userlogin)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"failed to bind"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to bind"})
 		return
 	}
 
 	var existinguser model.UserModel
 	result := database.DB.Where("email=?", userlogin.Email).First(&existinguser)
 	if result.Error != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error":"incorrect email or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "incorrect email or password"})
 		return
 	}
 
 	password := bcrypt.CompareHashAndPassword([]byte(existinguser.Password), []byte(userlogin.Password))
 	if password != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error":"invalid email or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
 		return
 	} else {
 		if existinguser.Status {
 			jwt.JwtToken(c, existinguser.UserID, userlogin.Email, RoleUser)
-			c.JSON(http.StatusOK, gin.H{"message":"Login successfully"})
+			c.JSON(http.StatusOK, gin.H{"message": "Login successfully"})
 		} else {
-			c.JSON(http.StatusUnauthorized, gin.H{"error":"blocked user"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "blocked user"})
 		}
 	}
 
@@ -159,7 +159,7 @@ func Productview(c *gin.Context) {
 	var product []model.Product
 	result := database.DB.Find(&product)
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"failed to load"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to load"})
 		return
 	}
 	var productview []gin.H
@@ -179,10 +179,23 @@ func Productview(c *gin.Context) {
 	c.JSON(http.StatusOK, productview)
 }
 
+func Productsearch(c *gin.Context) {
+	search := c.Request.FormValue("search")
+	if search == "" {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please send the search"})
+		return
+	}
+	var product []model.Product
+	if result := database.DB.Where("product_name ILIKE ?", "%"+search+"%").Find(&product).Error; result != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product"})
+		return
+	}
+	c.JSON(http.StatusOK, product)
+}
 func Logout(c *gin.Context) {
 	tokenstring := c.GetHeader("Authorization")
 	if tokenstring == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "token not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Token not found"})
 		return
 	}
 
@@ -190,7 +203,7 @@ func Logout(c *gin.Context) {
 	jwt.BlacklistedToken[tokenstring] = true
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":   "successfully logout",
-		"blacklist": jwt.BlacklistedToken[tokenstring],
+		"Message":   "Successfully logout",
+		"Blacklist": jwt.BlacklistedToken[tokenstring],
 	})
 }
