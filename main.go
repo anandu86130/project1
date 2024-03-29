@@ -61,6 +61,10 @@ func main() {
 	r.DELETE("/user/whishlist/:ID", jwt.AuthMiddleware("user"), routes.Deletewhishlist)
 	//user rating
 	r.POST("/user/rating/:ID", jwt.AuthMiddleware("user"), routes.Addrating)
+	//user product sort
+	r.POST("/user/product/sort", jwt.AuthMiddleware("user"), routes.Sortproduct)
+	//user category filter
+	r.POST("/user/product/category", jwt.AuthMiddleware("user"), routes.Categoryfilter)
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 

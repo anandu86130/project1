@@ -42,8 +42,9 @@ type Category struct {
 
 type Product struct {
 	gorm.Model
-	Product_name string     `json:"name" gorm:"unique"`
-	CategoryID   int        `json:"categoryid"`
+	Product_name string `json:"name" gorm:"unique"`
+	CategoryID   uint   `json:"category_id"`
+	Category     Category
 	ImagePath1   string     `json:"imagepath1"`
 	ImagePath2   string     `json:"imagepath2"`
 	ImagePath3   string     `json:"imagepath3"`
