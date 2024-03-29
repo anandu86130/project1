@@ -117,10 +117,19 @@ type Whishlist struct {
 	gorm.Model
 	UserID    uint
 	User      UserModel
-	ProductID uint64
+	ProductID uint
 	Product   Product
 }
 
+type Rating struct {
+	gorm.Model
+	UserID    uint
+	User      UserModel
+	ProductID uint
+	Product   Product
+	Rating    uint
+	Review    string
+}
 type AdminModel struct {
 	gorm.Model
 	ID       uint   `gorm:"primaryKey" json:"id"`

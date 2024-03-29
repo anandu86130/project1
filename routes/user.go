@@ -8,6 +8,7 @@ import (
 	"project1/model"
 	"project1/otp"
 	"project1/send"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -177,6 +178,32 @@ func Productview(c *gin.Context) {
 		productview = append(productview, details)
 	}
 	c.JSON(http.StatusOK, productview)
+}
+
+func Productdetails(c *gin.Context) {
+	id := c.Param("ID")
+	productid, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product id"})
+		return
+	}
+	var Rating model.Rating
+	if err := database.DB.Preload("Product").Where("product_id=?", productid).First(&Rating).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"name":        Rating.Product.Product_name,
+		"price":       Rating.Product.Price,
+		"imagepath1":  Rating.Product.ImagePath1,
+		"imagepath2":  Rating.Product.ImagePath2,
+		"imagepath3":  Rating.Product.ImagePath3,
+		"description": Rating.Product.Description,
+		"size":        Rating.Product.Size,
+		"rating":      Rating.Rating,
+		"review":      Rating.Review,
+	})
+
 }
 
 func Productsearch(c *gin.Context) {

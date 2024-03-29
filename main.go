@@ -37,6 +37,7 @@ func main() {
 	r.DELETE("/user/address/:ID", jwt.AuthMiddleware("user"), routes.Deleteaddress)
 	//user product
 	r.GET("/user/product", jwt.AuthMiddleware("user"), routes.Productview)
+	r.POST("/user/product/:ID",jwt.AuthMiddleware("user"), routes.Productdetails)
 	//user productsearch
 	r.POST("/user/search", jwt.AuthMiddleware("user"), routes.Productsearch)
 	//user cart
@@ -57,6 +58,9 @@ func main() {
 	//user whishlist
 	r.GET("/user/whishlist", jwt.AuthMiddleware("user"), routes.Whishlist)
 	r.POST("/user/whishlist/:ID", jwt.AuthMiddleware("user"), routes.Addtowhishlist)
+	r.DELETE("/user/whishlist/:ID", jwt.AuthMiddleware("user"), routes.Deletewhishlist)
+	//user rating
+	r.POST("/user/rating/:ID", jwt.AuthMiddleware("user"), routes.Addrating)
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 
