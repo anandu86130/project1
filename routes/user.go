@@ -166,6 +166,7 @@ func Productview(c *gin.Context) {
 	var productview []gin.H
 	for _, fetchedproducts := range product {
 		details := gin.H{
+			"productid":   fetchedproducts.ID,
 			"name":        fetchedproducts.Product_name,
 			"imagepath1":  fetchedproducts.ImagePath1,
 			"imagepath2":  fetchedproducts.ImagePath2,
@@ -187,23 +188,47 @@ func Productdetails(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product id"})
 		return
 	}
-	var Rating model.Rating
-	if err := database.DB.Preload("Product").Where("product_id=?", productid).First(&Rating).Error; err != nil {
+	var Product model.Product
+	if err := database.DB.Where("id=?", productid).First(&Product).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"name":        Rating.Product.Product_name,
-		"price":       Rating.Product.Price,
-		"imagepath1":  Rating.Product.ImagePath1,
-		"imagepath2":  Rating.Product.ImagePath2,
-		"imagepath3":  Rating.Product.ImagePath3,
-		"description": Rating.Product.Description,
-		"size":        Rating.Product.Size,
-		"rating":      Rating.Rating,
-		"review":      Rating.Review,
-	})
+	type productdetails struct {
+		Name        string
+		Price       uint
+		Imagepath1  string
+		ImagePath2  string
+		ImagePath3  string
+		Description string
+		Size        string
+	}
 
+	details := productdetails{
+		Name:        Product.Product_name,
+		Price:       Product.Price,
+		Imagepath1:  Product.ImagePath1,
+		ImagePath2:  Product.ImagePath2,
+		ImagePath3:  Product.ImagePath3,
+		Description: Product.Description,
+		Size:        Product.Size,
+	}
+
+	var rating model.Rating
+	database.DB.Where("product_id=?", productid).Find(&rating)
+
+	type ratingdetails struct {
+		Rating uint
+		Review string
+	}
+
+	rdetails := ratingdetails{
+		Rating: rating.Rating,
+		Review: rating.Review,
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"Product details":           details,
+		"product rating and review": rdetails,
+	})
 }
 
 func Productsearch(c *gin.Context) {

@@ -12,17 +12,18 @@ import (
 
 func CartView(c *gin.Context) {
 	var cart []model.Cart
+	var show []gin.H
 	userID := c.GetUint("userid")
 	var totalamount = 0
 	var count = 0
-	err := database.DB.Joins("Product").Where("user_id=?", userID).Find(&cart)
+	err := database.DB.Preload("Product").Where("user_id=?", userID).Find(&cart)
 	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find cart"})
 		return
 	}
 
 	for _, val := range cart {
-		c.JSON(http.StatusOK, gin.H{
+		show = append(show, gin.H{
 			"product name":     val.Product.Product_name,
 			"product image":    val.Product.ImagePath1,
 			"product quantity": val.Quantity,
@@ -37,6 +38,7 @@ func CartView(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "No products added to cart"})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
+			"cart":           show,
 			"total products": count,
 			"total Amount":   totalamount,
 		})
@@ -50,6 +52,12 @@ func Addtocart(c *gin.Context) {
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to convert"})
+		return
+	}
+
+	var product model.Product
+	if err := database.DB.Where("id=? AND deleted_at is NULL", id).First(&product).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product"})
 		return
 	}
 

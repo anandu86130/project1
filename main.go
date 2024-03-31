@@ -37,7 +37,7 @@ func main() {
 	r.DELETE("/user/address/:ID", jwt.AuthMiddleware("user"), routes.Deleteaddress)
 	//user product
 	r.GET("/user/product", jwt.AuthMiddleware("user"), routes.Productview)
-	r.POST("/user/product/:ID",jwt.AuthMiddleware("user"), routes.Productdetails)
+	r.POST("/user/product/:ID", jwt.AuthMiddleware("user"), routes.Productdetails)
 	//user productsearch
 	r.POST("/user/search", jwt.AuthMiddleware("user"), routes.Productsearch)
 	//user cart
@@ -92,6 +92,11 @@ func main() {
 	r.GET("/admin/order", jwt.AuthMiddleware("admin"), routes.Adminorderview)
 	r.PATCH("/admin/order/:ID", jwt.AuthMiddleware("admin"), routes.Adminorderstatus)
 	r.PUT("/admin/order/:ID", jwt.AuthMiddleware("admin"), routes.Admincancelorders)
+	//admin sales report
+	
+	r.GET("/admin/salesreport", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "sales.html", nil)
+	})
 	//admin logout
 	r.GET("/admin/logout", jwt.AuthMiddleware("admin"), routes.AdminLogout)
 

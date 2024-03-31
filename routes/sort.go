@@ -12,6 +12,7 @@ import (
 func Sortproduct(c *gin.Context) {
 	search := c.Request.FormValue("sort")
 	sort := strings.ToLower(search)
+	var details []gin.H
 	var product []model.Product
 	switch sort {
 	case "asc":
@@ -28,5 +29,18 @@ func Sortproduct(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please give correct sort"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"Message": product})
+	for _, v := range product {
+		details = append(details, gin.H{
+			"ID":         v.ID,
+			"Name":       v.Product_name,
+			"ImagePath1": v.ImagePath1,
+			"ImagePath2": v.ImagePath2,
+			"ImagePath3": v.ImagePath3,
+			"Price":      v.Price,
+			"Size":       v.Size,
+			"Quantity":   v.Quantity,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"Message": details})
 }

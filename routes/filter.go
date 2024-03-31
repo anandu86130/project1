@@ -17,10 +17,23 @@ func Categoryfilter(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find category"})
 		return
 	}
+	var details []gin.H
 	var product []model.Product
-	if err := database.DB.Preload("category").Where("category_id=?", category.ID).Find(&product).Error; err != nil {
+	if err := database.DB.Where("category_id=?", category.ID).Find(&product).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"Message": product})
+	for _, v := range product {
+		details = append(details, gin.H{
+			"Name":        v.Product_name,
+			"Imagepath1":  v.ImagePath1,
+			"Imagepath2":  v.ImagePath2,
+			"Imagepath3":  v.ImagePath3,
+			"Description": v.Description,
+			"Price":       v.Price,
+			"Size":        v.Size,
+			"Quantity":    v.Quantity,
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{"Message": details})
 }

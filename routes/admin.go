@@ -112,6 +112,7 @@ func Aproduct(c *gin.Context) {
 	var products []gin.H
 	for _, fetchedproducts := range product {
 		productdetails := gin.H{
+			"productid":   fetchedproducts.ID,
 			"name":        fetchedproducts.Product_name,
 			"imagepath1":  fetchedproducts.ImagePath1,
 			"imagepath2":  fetchedproducts.ImagePath2,
@@ -263,10 +264,10 @@ func Deletecategory(c *gin.Context) {
 	}
 	fetch := database.DB.Model(&delete).Update("DeletedAt", time.Now())
 	if fetch.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to delete category"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete category"})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"message":"category deleted successfully"})
+		c.JSON(http.StatusOK, gin.H{"message": "category deleted successfully"})
 	}
 }
 
@@ -275,15 +276,15 @@ func Deleteproduct(c *gin.Context) {
 	id := c.Param("ID")
 	err := database.DB.First(&delete, id)
 	if err.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"erro":"failed to fetch"})
+		c.JSON(http.StatusInternalServerError, gin.H{"erro": "failed to fetch"})
 		return
 	}
 	fetch := database.DB.Model(&delete).Update("DeletedAt", time.Now())
 	if fetch.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to delete product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete product"})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"message":"product deleted succcessfully"})
+		c.JSON(http.StatusOK, gin.H{"message": "product deleted succcessfully"})
 	}
 }
 
