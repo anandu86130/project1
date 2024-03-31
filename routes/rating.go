@@ -13,19 +13,19 @@ func Addrating(c *gin.Context) {
 	var rating model.Rating
 	err := c.BindJSON(&rating)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find rating"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to find rating"})
 		return
 	}
 	userid := c.GetUint("userid")
 
 	id := c.Param("ID")
 	if id == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please give product id"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please give product id"})
 		return
 	}
 	productid, err := strconv.Atoi(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to fetch id"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to fetch id"})
 		return
 	}
 	var product model.Product

@@ -33,12 +33,12 @@ func Addtowhishlist(c *gin.Context) {
 	userid := c.GetUint("userid")
 	id := c.Param("ID")
 	if id == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please give product id"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please give product id"})
 		return
 	}
 	productid, err := strconv.Atoi(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Invalid product id"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid product id"})
 		return
 	}
 	var product model.Product
@@ -67,7 +67,7 @@ func Deletewhishlist(c *gin.Context) {
 	id := c.Param("ID")
 	whishlistid, err := strconv.Atoi(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find whishlist"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to find whishlist"})
 		return
 	}
 	var whishlist model.Whishlist

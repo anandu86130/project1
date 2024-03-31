@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"project1/database"
 	"project1/model"
@@ -27,17 +26,15 @@ func UserProfile(c *gin.Context) {
 	var user model.UserModel
 	userid := c.GetUint("userid")
 	result := database.DB.Where("user_id=?", userid).First(&user)
-	fmt.Println("user========================================================================================", userid)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find user"})
 		return
 	}
 	var address []model.Address
 	var Addressshow []UserAddress
 	err := database.DB.Where("user_id", userid).Find(&address)
-	fmt.Println("addresssssssssssss================================================================", userid)
 	if err.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find user"})
 		return
 	}
 

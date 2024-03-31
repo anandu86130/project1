@@ -18,7 +18,7 @@ func CartView(c *gin.Context) {
 	var count = 0
 	err := database.DB.Preload("Product").Where("user_id=?", userID).Find(&cart)
 	if err.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find cart"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find cart"})
 		return
 	}
 
@@ -35,7 +35,7 @@ func CartView(c *gin.Context) {
 		count += 1
 	}
 	if totalamount == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "No products added to cart"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "No products added to cart"})
 	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"cart":           show,
@@ -51,7 +51,7 @@ func Addtocart(c *gin.Context) {
 	idStr := c.Param("ID")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to convert"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to convert"})
 		return
 	}
 
@@ -72,7 +72,7 @@ func Addtocart(c *gin.Context) {
 		fmt.Println("userid===========================================================================================", userID)
 		fmt.Println("productid===========================================================================================", id)
 		if err := database.DB.Create(&cart).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save to cart"})
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to save to cart"})
 			return
 		}
 	} else {
@@ -81,7 +81,7 @@ func Addtocart(c *gin.Context) {
 	}
 	fmt.Println("userid===========================================================================================", userID)
 	fmt.Println("productid===========================================================================================", id)
-	c.JSON(http.StatusOK, gin.H{"message": "product added successfully"})
+	c.JSON(http.StatusOK, gin.H{"Message": "Product added successfully"})
 }
 
 func Deletecart(c *gin.Context) {
@@ -89,21 +89,21 @@ func Deletecart(c *gin.Context) {
 	idStr := c.Param("ID")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to convert"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to convert"})
 		return
 	}
 	var cart model.Cart
 	result := database.DB.Where("user_id=? AND product_id=?", userID, id).First(&cart)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product"})
 		return
 	}
 
 	delete := database.DB.Delete(&cart)
 	if delete.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete product from cart"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to delete product from cart"})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"message": "successfully deleted product from the cart"})
+		c.JSON(http.StatusOK, gin.H{"Message": "Successfully deleted product from the cart"})
 	}
 }

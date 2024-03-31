@@ -13,14 +13,14 @@ func AddAddress(c *gin.Context) {
 	var user model.UserModel
 	result := database.DB.Where("user_id=?", id).First(&user)
 	if result.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find user"})
 		return
 	}
 
 	var address model.Address
 	err := c.BindJSON(&address)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"failed to bind"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error":"Failed to bind"})
 		return
 	}
 
@@ -28,12 +28,12 @@ func AddAddress(c *gin.Context) {
 	database.DB.Where("address=?", address.Address).First(&dbaddress)
 
 	if dbaddress.AddressId != 0 && address.Address == dbaddress.Address {
-		c.JSON(http.StatusConflict, gin.H{"error":"this address already exists"})
+		c.JSON(http.StatusConflict, gin.H{"Error":"This address already exists"})
 		return
 	}
 
 	if len(address.Pincode) != 6 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"invalid pincode"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error":"Invalid pincode"})
 		return
 	}
 
@@ -47,11 +47,11 @@ func AddAddress(c *gin.Context) {
 		UserId:   user.UserID,
 	})
 	if create.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error":"failed to create address"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error":"Failed to create address"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message":"Address added successfully"})
+	c.JSON(http.StatusOK, gin.H{"Message":"Address added successfully"})
 }
 
 func EditAddress(c *gin.Context) {
@@ -59,21 +59,21 @@ func EditAddress(c *gin.Context) {
 	var address model.Address
 	update := c.BindJSON(&address)
 	if update != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error":"failed to bind"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error":"Failed to bind"})
 		return
 	}
 	var dbaddress model.Address
 	result := database.DB.First(&dbaddress, id)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error":"address not found"})
+		c.JSON(http.StatusNotFound, gin.H{"Error":"Address not found"})
 		return
 	}
 
 	if result.RowsAffected > 0 {
 		database.DB.Model(&dbaddress).Updates(address)
-		c.JSON(http.StatusOK, gin.H{"message": "address updated successfully"})
+		c.JSON(http.StatusOK, gin.H{"Message": "Address updated successfully"})
 	} else {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update address"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update address"})
 		return
 	}
 }
@@ -83,14 +83,14 @@ func Deleteaddress(c *gin.Context) {
 	var dbaddress model.Address
 	result := database.DB.Where("address_id=?", addressID).First(&dbaddress)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error":"address not found"})
+		c.JSON(http.StatusNotFound, gin.H{"Error":"Address not found"})
 		return
 	}
 	delete := database.DB.Delete(&dbaddress)
 	if delete.Error != nil {
-		c.JSON(http.StatusInternalServerError,gin.H{"error":"failed to delete address"})
+		c.JSON(http.StatusInternalServerError,gin.H{"Error":"Failed to delete address"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message":"address deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"Message":"Address deleted successfully"})
 }

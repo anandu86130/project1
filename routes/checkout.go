@@ -76,7 +76,7 @@ func Checkout(c *gin.Context) {
 
 		razorId, errr := payment.Paymenthandler(strconv.Itoa(int(orderitems[0].ID)), int(totalamount))
 		if errr != nil {
-			c.JSON(402, gin.H{"Error": errr})
+			c.JSON(http.StatusBadRequest, gin.H{"Error": errr})
 			return
 		}
 		recieptID := generateReceiptID()
@@ -87,7 +87,7 @@ func Checkout(c *gin.Context) {
 			Paymentstatus: "Failed",
 		}
 		database.DB.Create(&create)
-		c.JSON(200, gin.H{"Message": "Complete the payment", "Order": razorId})
+		c.JSON(http.StatusOK, gin.H{"Message": "Complete the payment", "Order": razorId})
 	}
 
 	order := model.Order{
@@ -152,7 +152,7 @@ func Orderdetails(c *gin.Context) {
 	var orderlist []model.Orderitems
 	orderid := c.Param("ID")
 	if result := database.DB.Where("order_id", orderid).Preload("Order").Preload("Product").Find(&orderlist).Error; result != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Eror": "Failed to find order details"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find order details"})
 		return
 	}
 	for _, orderitem := range orderlist {
@@ -175,13 +175,13 @@ func Cancelorder(c *gin.Context) {
 	// var order model.Order
 	orderitemid := c.Param("ID")
 	if orderitemid == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please give the orderid"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please give the orderid"})
 		return
 	}
 
 	orderID, err := strconv.ParseUint(orderitemid, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Invalid order ID"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid order ID"})
 		return
 	}
 
@@ -191,7 +191,7 @@ func Cancelorder(c *gin.Context) {
 	}
 	reason := c.Request.FormValue("reason")
 	if reason == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please give the reason"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please give the reason"})
 		return
 	}
 

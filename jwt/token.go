@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"fmt"
 	"net/http"
 	"project1/model"
 	"time"
@@ -21,20 +20,6 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-// func JwtTokenStart(c *gin.Context, userId uint, email string, role string) {
-// 	tokenString, err := createToken(userId, email, role)
-// 	if err != nil {
-// 		c.JSON(200, gin.H{
-// 			"Error": "Failed to create Token",
-// 		})
-// 	}
-// 	c.Set("token", tokenString)
-// 	c.JSON(201, gin.H{
-// 		"Token": tokenString,
-// 	})
-// 	fmt.Println("---------------===  ", tokenString, "  ===-----------------")
-// }
-
 func JwtToken(c *gin.Context, id uint, email string, role string) {
 	claims := Claims{
 		ID:    id,
@@ -48,23 +33,23 @@ func JwtToken(c *gin.Context, id uint, email string, role string) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString(SecretKey)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to sign token"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to sign token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": signedToken})
+	c.JSON(http.StatusOK, gin.H{"Token": signedToken})
 }
 
 func AuthMiddleware(requiredRole string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenstring := c.GetHeader("Authorization")
 		if tokenstring == "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Token not provided"})
+			c.JSON(http.StatusBadRequest, gin.H{"Error": "Token not provided"})
 			c.Abort()
 			return
 		}
 		if BlacklistedToken[tokenstring] {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Token removed"})
+			c.JSON(http.StatusBadRequest, gin.H{"Error": "Token removed"})
 			c.Abort()
 			return
 		}
@@ -74,18 +59,17 @@ func AuthMiddleware(requiredRole string) gin.HandlerFunc {
 			return SecretKey, nil
 		})
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid token"})
+			c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid token"})
 			c.Abort()
 			return
 		}
 		if claims.Role != requiredRole {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "No permission"})
+			c.JSON(http.StatusBadRequest, gin.H{"Error": "No permission"})
 			c.Abort()
 			return
 		}
 
 		c.Set("userid", claims.ID)
-		fmt.Println("userid============================================================================================", claims.ID)
 		c.Next()
 	}
 }

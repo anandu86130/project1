@@ -11,7 +11,7 @@ import (
 func Coupon(c *gin.Context) {
 	var coupon []model.Coupon
 	if result := database.DB.Find(&coupon).Error; result != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to find coupon"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find coupon"})
 		return
 	}
 
@@ -31,15 +31,15 @@ func Addcoupon(c *gin.Context) {
 	var coupon model.Coupon
 	err := c.ShouldBindJSON(&coupon)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to bind"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to bind"})
 		return
 	}
 
 	if result := database.DB.Create(&coupon).Error; result != nil {
-		c.JSON(http.StatusOK, gin.H{"error": "failed to create coupon"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create coupon"})
 		return
 	} else {
-		c.JSON(http.StatusOK, gin.H{"message": "coupon created successfully"})
+		c.JSON(http.StatusOK, gin.H{"Message": "Coupon created successfully"})
 	}
 }
 
@@ -47,8 +47,8 @@ func Deletecoupon(c *gin.Context) {
 	var deletecoupon model.Coupon
 	id := c.Param("ID")
 	if result := database.DB.Where("id=?", id).Delete(&deletecoupon).Error; result != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete coupon"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to delete coupon"})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "coupon deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"Message": "Coupon deleted successfully"})
 }

@@ -21,9 +21,9 @@ func Paymenthandler(orderId string, amount int) (string, error) {
 	client := razorpay.NewClient(os.Getenv("RAZORPAY_ID"), os.Getenv("RAZORPAY_SECRET"))
 
 	data := map[string]interface{}{
-		"amount":   amount * 100,
-		"currency": "INR",
-		"receipt":  orderId,
+		"Amount":   amount * 100,
+		"Currency": "INR",
+		"Receipt":  orderId,
 	}
 
 	body, err := client.Order.Create(data, nil)
@@ -41,19 +41,19 @@ func Paymentconfirmation(c *gin.Context) {
 		Signature string `json:"signature"`
 	}
 	if err := c.BindJSON(&response); err != nil {
-		fmt.Println("error", err)
+		fmt.Println("Error", err)
 		return
 	}
 	err := Razorpaymentverification(response.OrderID, response.PaymentID, response.Signature)
 	if err != nil {
-		fmt.Println("error", err)
+		fmt.Println("Error", err)
 		return
 	} else {
-		fmt.Println("payment done.")
+		fmt.Println("Payment done.")
 	}
 	payment := model.Paymentdetails{
 		PaymentId:     response.PaymentID,
-		Paymentstatus: "success",
+		Paymentstatus: "Success",
 	}
 	database.DB.Where("order_id=?", response.OrderID).Updates(&payment)
 	c.JSON(http.StatusOK, gin.H{"Message": "Payment recieved successfullly"})
