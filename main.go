@@ -92,11 +92,8 @@ func main() {
 	r.GET("/admin/order", jwt.AuthMiddleware("admin"), routes.Adminorderview)
 	r.PATCH("/admin/order/:ID", jwt.AuthMiddleware("admin"), routes.Adminorderstatus)
 	r.PUT("/admin/order/:ID", jwt.AuthMiddleware("admin"), routes.Admincancelorders)
-	//admin sales report
-	
-	r.GET("/admin/salesreport", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "sales.html", nil)
-	})
+	//admin addproductoffer
+	r.POST("/admin/productoffer", jwt.AuthMiddleware("admin"), routes.Addproductoffer)
 	//admin logout
 	r.GET("/admin/logout", jwt.AuthMiddleware("admin"), routes.AdminLogout)
 

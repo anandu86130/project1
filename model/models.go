@@ -131,6 +131,12 @@ type Rating struct {
 	Rating    uint
 	Review    string
 }
+type Productoffer struct {
+	gorm.Model
+	ProductID uint
+	Product   Product
+	Offer     uint
+}
 type AdminModel struct {
 	gorm.Model
 	ID       uint   `gorm:"primaryKey" json:"id"`

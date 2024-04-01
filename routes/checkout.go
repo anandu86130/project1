@@ -89,7 +89,6 @@ func Checkout(c *gin.Context) {
 		database.DB.Create(&create)
 		c.JSON(http.StatusOK, gin.H{"Message": "Complete the payment", "Order": razorId})
 	}
-
 	order := model.Order{
 		UserID:        userid,
 		CouponId:      coupon.ID,

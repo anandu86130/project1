@@ -21,9 +21,9 @@ func Paymenthandler(orderId string, amount int) (string, error) {
 	client := razorpay.NewClient(os.Getenv("RAZORPAY_ID"), os.Getenv("RAZORPAY_SECRET"))
 
 	data := map[string]interface{}{
-		"Amount":   amount * 100,
-		"Currency": "INR",
-		"Receipt":  orderId,
+		"amount":   amount * 100,
+		"currency": "INR",
+		"receipt":  orderId,
 	}
 
 	body, err := client.Order.Create(data, nil)

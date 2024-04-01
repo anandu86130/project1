@@ -225,9 +225,18 @@ func Productdetails(c *gin.Context) {
 		Rating: rating.Rating,
 		Review: rating.Review,
 	}
+
+	var offer model.Productoffer
+	if err := database.DB.Where("product_id=?", productid).Find(&offer).Error; err != nil {
+		Offeramount = 0
+	} else {
+		Offeramount = offer.Offer
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"Product details":           details,
 		"product rating and review": rdetails,
+		"prodct offer":              Offeramount,
 	})
 }
 
