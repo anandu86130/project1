@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var Paymentorderid string
+
 func Checkout(c *gin.Context) {
 	userid := c.GetUint("userid")
 	var cart []model.Cart
@@ -79,6 +81,8 @@ func Checkout(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"Error": errr})
 			return
 		}
+		Paymentorderid = razorId
+
 		recieptID := generateReceiptID()
 		create := model.Paymentdetails{
 			OrderId:       razorId,
@@ -149,29 +153,35 @@ func Orderview(c *gin.Context) {
 
 func Orderdetails(c *gin.Context) {
 	var orderlist []model.Orderitems
+	var details []gin.H
 	orderid := c.Param("ID")
 	if result := database.DB.Where("order_id", orderid).Preload("Order").Preload("Product").Find(&orderlist).Error; result != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find order details"})
 		return
 	}
+	var paymentdetails model.Paymentdetails
+	database.DB.Where("order_id=?", Paymentorderid).First(&paymentdetails)
 	for _, orderitem := range orderlist {
-		c.JSON(http.StatusOK, gin.H{
+		details = append(details, gin.H{
 			"order item id": orderitem.ID,
 			"Product":       orderitem.ProductID,
 			"product name":  orderitem.Product.Product_name,
 			"order date":    orderitem.Order.Orderdate,
 			"Amount":        orderitem.Subtotal,
 			"Quantity":      orderitem.Quantity,
-			"Status":        orderitem.Orderstatus,
+			"OrderStatus":   orderitem.Orderstatus,
 			"AddressID":     orderitem.Order.AddressId,
 		})
 	}
+	c.JSON(http.StatusOK, gin.H{
+		"Message":       details,
+		"PaymentStatus": paymentdetails.Paymentstatus,
+	})
 }
 
 func Cancelorder(c *gin.Context) {
 	var orderlist model.Orderitems
 	var productQuantity model.Product
-	// var order model.Order
 	orderitemid := c.Param("ID")
 	if orderitemid == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please give the orderid"})
@@ -223,8 +233,8 @@ func Cancelorder(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Cant find coupon code"})
 			return
 		} else {
-			orderamount.Totalamount += uint(coupon.Discount)
-			orderamount.Totalamount -= orderlist.Subtotal
+			// orderamount.Totalamount += uint(coupon.Discount)
+			// orderamount.Totalamount -= orderlist.Subtotal
 			orderamount.Code = ""
 		}
 		if err := database.DB.Save(&orderamount).Error; err != nil {

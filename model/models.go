@@ -137,6 +137,12 @@ type Productoffer struct {
 	Product   Product
 	Offer     uint
 }
+
+type Salesdata struct {
+	gorm.Model
+	OrderID uint
+	Order   Order
+}
 type AdminModel struct {
 	gorm.Model
 	ID       uint   `gorm:"primaryKey" json:"id"`

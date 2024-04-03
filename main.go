@@ -7,6 +7,7 @@ import (
 	"project1/jwt"
 	"project1/payment"
 	"project1/routes"
+	"project1/sales"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,6 +66,8 @@ func main() {
 	r.POST("/user/product/sort", jwt.AuthMiddleware("user"), routes.Sortproduct)
 	//user category filter
 	r.POST("/user/product/category", jwt.AuthMiddleware("user"), routes.Categoryfilter)
+	//user wallet
+	r.GET("/user/wallet", jwt.AuthMiddleware("user"), routes.Wallet)
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 
@@ -94,6 +97,8 @@ func main() {
 	r.PUT("/admin/order/:ID", jwt.AuthMiddleware("admin"), routes.Admincancelorders)
 	//admin addproductoffer
 	r.POST("/admin/productoffer", jwt.AuthMiddleware("admin"), routes.Addproductoffer)
+	//admin salesreport
+	r.GET("/admin/salesreport", jwt.AuthMiddleware("admin"), sales.Salesreport)
 	//admin logout
 	r.GET("/admin/logout", jwt.AuthMiddleware("admin"), routes.AdminLogout)
 
