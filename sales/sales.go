@@ -1,6 +1,8 @@
 package sales
 
 import (
+	"bytes"
+	"fmt"
 	"net/http"
 	"project1/database"
 	"project1/model"
@@ -8,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jung-kurt/gofpdf"
 )
 
 func Salesreport(c *gin.Context) {
@@ -37,18 +40,19 @@ func dailySalesReport(c *gin.Context) {
 	var total int
 	for _, orders := range order {
 		salesData = append(salesData, gin.H{
-			"OrderID":          orders.Order.ID,
-			"OrderDate":        orders.Order.Orderdate,
-			"PaymentMethod":    orders.Order.Paymentmethod,
-			"OrderStatus":      orders.Orderstatus,
-			"TotalSalesAmount": orders.Order.Totalamount,
+			"OrderID":     orders.Order.ID,
+			"OrderDate":   orders.Order.Orderdate,
+			"Payment":     orders.Order.Paymentmethod,
+			"OrderStatus": orders.Orderstatus,
+			"TotalAmount": orders.Order.Totalamount,
 		})
 		total += int(orders.Order.Totalamount)
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"SalesReport": salesData,
-		"Grandtotal":  total,
-	})
+	// c.JSON(http.StatusOK, gin.H{
+	// 	"SalesReport": salesData,
+	// 	"Grandtotal":  total,
+	// })
+	generatePDF(c, salesData, total)
 }
 
 func weeklySalesReport(c *gin.Context) {
@@ -64,43 +68,49 @@ func weeklySalesReport(c *gin.Context) {
 	var total int
 	for _, orders := range order {
 		salesData = append(salesData, gin.H{
-			"OrderID":          orders.Order.ID,
-			"OrderDate":        orders.Order.Orderdate,
-			"PaymentMethod":    orders.Order.Paymentmethod,
-			"OrderStatus":      orders.Orderstatus,
-			// "PaymentStatus":    orders.Order.Paymentdetails.Paymentstatus,
-			"TotalSalesAmount": orders.Order.Totalamount,
+			"OrderID":     orders.Order.ID,
+			"OrderDate":   orders.Order.Orderdate,
+			"Payment":     orders.Order.Paymentmethod,
+			"OrderStatus": orders.Orderstatus,
+			"TotalAmount": orders.Order.Totalamount,
 		})
 		total += int(orders.Order.Totalamount)
 
-		c.JSON(http.StatusOK, gin.H{
-			"SalesReport": salesData,
-			"GrandTotal":  total,
-		})
+		// c.JSON(http.StatusOK, gin.H{
+		// 	"SalesReport": salesData,
+		// 	"GrandTotal":  total,
+		// })
 	}
+	generatePDF(c, salesData, total)
 }
 
-// pdf := gofpdf.New("P", "mm", "A4", "")
-// pdf.AddPage()
-// pdf.SetFont("Arial", "B", 16)
-// pdf.Cell(40, 10, "Sales Report")startDate
-// pdf.Ln(10)
+func generatePDF(c *gin.Context, salesData []gin.H, grandTotal int) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(40, 10, "Sales Report")
+	pdf.Ln(10)
 
-// pdf.CellFormat(190, 10, "Period: "+.Format("2006-01-02")+" to "+endDate.Format("2006-01-02"), "", 1, "L", false, 0, "")
+	for _, data := range salesData {
+		for key, value := range data {
+			strValue := fmt.Sprintf("%v", value)
+			pdf.CellFormat(40, 10, key+":", "", 0, "", false, 0, "")
+			pdf.CellFormat(40, 10, strValue, "", 1, "", false, 0, "")
+		}
+		pdf.Ln(5)
+	}
 
-// for _, data := range salesData {
-// 	pdf.CellFormat(190, 10, data.Date.String(), "", 1, "L", false, 0, "")
-// 	pdf.CellFormat(95, 10, "Total Sales: "+fmt.Sprintf("%.2f", data.TotalSales), "", 0, "L", false, 0, "")
-// 	pdf.CellFormat(95, 10, "Total Orders: "+strconv.Itoa(data.TotalOrders), "", 1, "L", false, 0, "")
-// }
+	strGrandTotal := fmt.Sprintf("%d", grandTotal)
+	pdf.CellFormat(40, 10, "Grand Total:", "", 0, "", false, 0, "")
+	pdf.CellFormat(40, 10, strGrandTotal, "", 1, "", false, 0, "")
 
-// // Save the PDF to a buffer
-// var buf bytes.Buffer
-// pdf.Output(&buf)
+	var buf bytes.Buffer
+	if err := pdf.Output(&buf); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to generate PDF"})
+		return
+	}
 
-// // Set response headers for PDF
-// c.Header("Content-Type", "application/pdf")
-// c.Header("Content-Disposition", "attachment; filename=sales_report.pdf")
-
-// // Write the PDF buffer to the response
-// c.Data(http.StatusOK, "application/pdf", buf.Bytes())
+	c.Header("Content-Type", "application/pdf")
+	c.Header("Content-Disposition", "attachment; filename=sales_report.pdf")
+	c.Data(http.StatusOK, "application/pdf", buf.Bytes())
+}

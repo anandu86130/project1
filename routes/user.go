@@ -240,19 +240,6 @@ func Productdetails(c *gin.Context) {
 	})
 }
 
-func Productsearch(c *gin.Context) {
-	search := c.Request.FormValue("search")
-	if search == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please send the search"})
-		return
-	}
-	var product []model.Product
-	if result := database.DB.Where("product_name ILIKE ?", "%"+search+"%").Find(&product).Error; result != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product"})
-		return
-	}
-	c.JSON(http.StatusOK, product)
-}
 func Logout(c *gin.Context) {
 	tokenstring := c.GetHeader("Authorization")
 	if tokenstring == "" {

@@ -68,6 +68,8 @@ func main() {
 	r.POST("/user/product/category", jwt.AuthMiddleware("user"), routes.Categoryfilter)
 	//user wallet
 	r.GET("/user/wallet", jwt.AuthMiddleware("user"), routes.Wallet)
+	// admin invoice
+	r.GET("/admin/invoice", jwt.AuthMiddleware("user"), invoice.Invoicedownload)
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 

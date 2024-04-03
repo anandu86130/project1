@@ -46,6 +46,7 @@ require (
 	github.com/jackc/pgx/v5 v5.4.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/razorpay/razorpay-go v1.3.1
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible
 	golang.org/x/crypto v0.14.0 // indirect

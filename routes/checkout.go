@@ -104,6 +104,10 @@ func Checkout(c *gin.Context) {
 		Orderdate:     currenttime,
 	}
 
+	if paymentmethod == "COD" && totalamount > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Order above RS 1000 should not allowed for COD"})
+		return
+	}
 	if result := database.DB.Create(&order).Error; result != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create order"})
 		return
@@ -227,6 +231,24 @@ func Cancelorder(c *gin.Context) {
 		return
 	}
 
+	var wallet model.Wallet
+	userID := c.GetUint("userid")
+	if err := database.DB.First(&wallet, "user_id=?", userID).Error; err != nil {
+		wallet = model.Wallet{
+			UserID: userID,
+			Amount: 0,
+		}
+		if err := database.DB.Create(&wallet).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create wallet"})
+			return
+		}
+	}
+	wallet.Amount += float64(orderlist.Subtotal)
+
+	if err := database.DB.Save(&wallet).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to save amount to wallet"})
+		return
+	}
 	var coupon model.Coupon
 	if orderamount.Code != "" {
 		if err := database.DB.First(&coupon, "code=?", orderamount.Code).Error; err != nil {
@@ -251,23 +273,5 @@ func Cancelorder(c *gin.Context) {
 		}
 	}
 
-	var wallet model.Wallet
-	userID := c.GetUint("userid")
-	if err := database.DB.First(&wallet, "user_id=?", userID).Error; err != nil {
-		wallet = model.Wallet{
-			UserID: userID,
-			Amount: 0,
-		}
-		if err := database.DB.Create(&wallet).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create wallet"})
-			return
-		}
-	}
-	wallet.Amount += float64(orderlist.Subtotal)
-
-	if err := database.DB.Save(&wallet).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to save amount to wallet"})
-		return
-	}
 	c.JSON(http.StatusOK, gin.H{"Message": "Order successfully cancelled"})
 }
