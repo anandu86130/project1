@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"project1/database"
 	"project1/helper"
+	"project1/invoice"
 	"project1/jwt"
 	"project1/payment"
 	"project1/routes"
@@ -69,7 +70,7 @@ func main() {
 	//user wallet
 	r.GET("/user/wallet", jwt.AuthMiddleware("user"), routes.Wallet)
 	// admin invoice
-	r.GET("/admin/invoice", jwt.AuthMiddleware("user"), invoice.Invoicedownload)
+	r.GET("/user/invoice/:ID", jwt.AuthMiddleware("user"), invoice.Invoicedownload)
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 

@@ -2,10 +2,10 @@ package sales
 
 import (
 	"bytes"
-	"fmt"
 	"net/http"
 	"project1/database"
 	"project1/model"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,27 +32,11 @@ func dailySalesReport(c *gin.Context) {
 	endDate := startDate.Add(24 * time.Hour)
 
 	var order []model.Orderitems
-	if err := database.DB.Preload("Order").Where("created_at BETWEEN ? AND ?", startDate, endDate).Find(&order).Error; err != nil {
+	if err := database.DB.Preload("Order").Preload("Prouct").Where("created_at BETWEEN ? AND ?", startDate, endDate).Find(&order).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to fetch orders"})
 		return
 	}
-	var salesData []gin.H
-	var total int
-	for _, orders := range order {
-		salesData = append(salesData, gin.H{
-			"OrderID":     orders.Order.ID,
-			"OrderDate":   orders.Order.Orderdate,
-			"Payment":     orders.Order.Paymentmethod,
-			"OrderStatus": orders.Orderstatus,
-			"TotalAmount": orders.Order.Totalamount,
-		})
-		total += int(orders.Order.Totalamount)
-	}
-	// c.JSON(http.StatusOK, gin.H{
-	// 	"SalesReport": salesData,
-	// 	"Grandtotal":  total,
-	// })
-	generatePDF(c, salesData, total)
+	generatepdf(c, order)
 }
 
 func weeklySalesReport(c *gin.Context) {
@@ -60,57 +44,65 @@ func weeklySalesReport(c *gin.Context) {
 	endDate := startDate.Add(7 * 24 * time.Hour)
 
 	var order []model.Orderitems
-	if err := database.DB.Preload("Order").Where("created_at BETWEEN ? AND ?", startDate, endDate).Find(&order).Error; err != nil {
+	if err := database.DB.Preload("Order").Preload("Product").Where("created_at BETWEEN ? AND ?", startDate, endDate).Find(&order).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to fetch orders"})
 		return
 	}
-	var salesData []gin.H
-	var total int
-	for _, orders := range order {
-		salesData = append(salesData, gin.H{
-			"OrderID":     orders.Order.ID,
-			"OrderDate":   orders.Order.Orderdate,
-			"Payment":     orders.Order.Paymentmethod,
-			"OrderStatus": orders.Orderstatus,
-			"TotalAmount": orders.Order.Totalamount,
-		})
-		total += int(orders.Order.Totalamount)
-
-		// c.JSON(http.StatusOK, gin.H{
-		// 	"SalesReport": salesData,
-		// 	"GrandTotal":  total,
-		// })
-	}
-	generatePDF(c, salesData, total)
+	generatepdf(c, order)
 }
 
-func generatePDF(c *gin.Context, salesData []gin.H, grandTotal int) {
+func generatepdf(c *gin.Context, order []model.Orderitems) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
-	pdf.SetFont("Arial", "B", 16)
+	pdf.SetFont("Arial", "B", 12) // Reduce font size to fit the table
+
+	// Title
 	pdf.Cell(40, 10, "Sales Report")
 	pdf.Ln(10)
 
-	for _, data := range salesData {
-		for key, value := range data {
-			strValue := fmt.Sprintf("%v", value)
-			pdf.CellFormat(40, 10, key+":", "", 0, "", false, 0, "")
-			pdf.CellFormat(40, 10, strValue, "", 1, "", false, 0, "")
+	// Customer Information
+	pdf.Cell(40, 10, "Order Information:")
+	pdf.Ln(10)
+
+	// Order Table Headers
+	pdf.SetFillColor(240, 240, 240)
+	pdf.CellFormat(20, 10, "Order ID", "1", 0, "C", true, 0, "") // Reduce column width
+	pdf.CellFormat(30, 10, "Order Date", "1", 0, "C", true, 0, "")
+	pdf.CellFormat(40, 10, "Product Name", "1", 0, "C", true, 0, "") // Increase column width
+	pdf.CellFormat(40, 10, "Order Status", "1", 0, "C", true, 0, "") // Increase column width
+	pdf.CellFormat(30, 10, "Quantity", "1", 0, "C", true, 0, "")
+	pdf.CellFormat(30, 10, "Amount", "1", 0, "C", true, 0, "")
+	pdf.Ln(10)
+
+	// Populate the table with order items data
+	var totalAmount float64
+	for _, item := range order {
+		if item.Orderstatus == "delivered" || item.Orderstatus == "pending" {
+			pdf.CellFormat(20, 10, strconv.Itoa(int(item.OrderID)), "1", 0, "C", false, 0, "") // Reduce column width
+			pdf.CellFormat(30, 10, item.Order.Orderdate.Format("2006-01-02"), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(40, 10, item.Product.Product_name, "1", 0, "", false, 0, "") // Increase column width
+			pdf.CellFormat(40, 10, item.Orderstatus, "1", 0, "", false, 0, "")          // Increase column width
+			pdf.CellFormat(30, 10, strconv.Itoa(int(item.Quantity)), "1", 0, "C", false, 0, "")
+			pdf.CellFormat(30, 10, strconv.FormatFloat(float64(item.Subtotal), 'f', 2, 64), "1", 0, "R", true, 0, "")
+			pdf.Ln(10)
+			totalAmount += float64(item.Subtotal)
 		}
-		pdf.Ln(5)
 	}
+	// Grand Total
+	pdf.CellFormat(100, 10, "Grand Total", "1", 0, "C", false, 0, "") // Adjust width to fit the total
+	pdf.CellFormat(90, 10, strconv.FormatFloat(totalAmount, 'f', 2, 64), "1", 0, "R", true, 0, "")
 
-	strGrandTotal := fmt.Sprintf("%d", grandTotal)
-	pdf.CellFormat(40, 10, "Grand Total:", "", 0, "", false, 0, "")
-	pdf.CellFormat(40, 10, strGrandTotal, "", 1, "", false, 0, "")
-
+	// Write PDF content to a buffer
 	var buf bytes.Buffer
 	if err := pdf.Output(&buf); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to generate PDF"})
 		return
 	}
 
+	// Set HTTP headers for PDF download
 	c.Header("Content-Type", "application/pdf")
 	c.Header("Content-Disposition", "attachment; filename=sales_report.pdf")
+
+	// Write the PDF content to the response body
 	c.Data(http.StatusOK, "application/pdf", buf.Bytes())
 }
