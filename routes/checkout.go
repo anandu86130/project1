@@ -88,7 +88,7 @@ func Checkout(c *gin.Context) {
 			OrderId:       razorId,
 			Paymentamount: int(totalamount),
 			Reciept:       uint(recieptID),
-			Paymentstatus: "Failed",
+			Paymentstatus: "Pending",
 		}
 		database.DB.Create(&create)
 		c.JSON(http.StatusOK, gin.H{"Message": "Complete the payment", "Order": razorId})
