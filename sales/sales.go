@@ -21,8 +21,8 @@ func Salesreport(c *gin.Context) {
 		dailySalesReport(c)
 	case "weekly":
 		weeklySalesReport(c)
-	// case "monthly":
-	// 	monthlySalesReport(c)
+	case "monthly":
+		monthlySalesReport(c)
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid sales report type"})
 	}
