@@ -47,6 +47,11 @@ func Paymentconfirmation(c *gin.Context) {
 	err := Razorpaymentverification(response.OrderID, response.PaymentID, response.Signature)
 	if err != nil {
 		fmt.Println("Error", err)
+		paymentfailed := model.Paymentdetails{
+			PaymentId:     response.PaymentID,
+			Paymentstatus: "failed",
+		}
+		database.DB.Where("order_id=?", response.OrderID).Updates(paymentfailed)
 		return
 	} else {
 		fmt.Println("Payment done.")
