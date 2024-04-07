@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"math/rand"
 	"net/http"
 	"project1/database"
@@ -184,8 +185,6 @@ func Orderdetails(c *gin.Context) {
 }
 
 func Cancelorder(c *gin.Context) {
-	var orderlist model.Orderitems
-	var productQuantity model.Product
 	orderitemid := c.Param("ID")
 	if orderitemid == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please give the orderid"})
@@ -197,6 +196,8 @@ func Cancelorder(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid order ID"})
 		return
 	}
+	var orderlist model.Orderitems
+	var productQuantity model.Product
 
 	if result := database.DB.First(&orderlist, orderID).Error; result != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find order"})
@@ -230,7 +231,7 @@ func Cancelorder(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to add quantity"})
 		return
 	}
-	if orderlist.Order.Paymentmethod == "PAYNOW" {
+	if orderamount.Paymentmethod == "PAYNOW" {
 		var wallet model.Wallet
 		userID := c.GetUint("userid")
 		if err := database.DB.First(&wallet, "user_id=?", userID).Error; err != nil {
@@ -243,27 +244,21 @@ func Cancelorder(c *gin.Context) {
 				return
 			}
 		}
+		var amountToAdd float64
 		if orderamount.Totalamount < orderlist.Subtotal {
-			wallet.Amount += float64(orderamount.Totalamount)
+			amountToAdd += float64(orderamount.Totalamount)
 		} else {
-			wallet.Amount += float64(orderamount.Totalamount)
+			amountToAdd += float64(orderlist.Subtotal)
 		}
+
+		wallet.Amount += amountToAdd
 
 		if err := database.DB.Save(&wallet).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to save amount to wallet"})
 			return
 		}
-	}
-	var coupon model.Coupon
-	if orderamount.Code != "" {
-		if err := database.DB.First(&coupon, "code=?", orderamount.Code).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Cant find coupon code"})
-			return
-		} else {
-			// orderamount.Totalamount += uint(coupon.Discount)
-			// orderamount.Totalamount -= orderlist.Subtotal
-			orderamount.Code = ""
-		}
+
+		orderamount.Totalamount -= uint(amountToAdd)
 		if err := database.DB.Save(&orderamount).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order details"})
 			return
@@ -271,6 +266,19 @@ func Cancelorder(c *gin.Context) {
 	}
 
 	if orderlist.Order.Paymentmethod != "PAYNOW" {
+		var coupon model.Coupon
+		if orderamount.Code != "" {
+			if err := database.DB.First(&coupon, "code=?", orderamount.Code).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"Error": "Cant find coupon code"})
+				return
+			} else {
+				orderamount.Code = ""
+			}
+			if err := database.DB.Save(&orderamount).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order details"})
+				return
+			}
+		}
 		orderlist.Orderstatus = "cancelled"
 		orderlist.Ordercancelreason = reason
 		if err := database.DB.Save(&orderlist).Error; err != nil {
