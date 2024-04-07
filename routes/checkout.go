@@ -207,30 +207,30 @@ func Cancelorder(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please give the reason"})
 		return
 	}
-	
+
 	if orderlist.Orderstatus == "cancelled" {
 		c.JSON(http.StatusOK, gin.H{"Message": "Order already cancelled"})
 		return
 	}
-	
+
 	if err := database.DB.Save(&orderlist).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order"})
 		return
 	}
-	
+
 	var orderamount model.Order
 	if err := database.DB.First(&orderamount, orderlist.OrderID).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find order details"})
 		return
 	}
-	
+
 	database.DB.First(&productQuantity, orderlist.ProductID)
 	productQuantity.Quantity += orderlist.Quantity
 	if err := database.DB.Save(&productQuantity).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to add quantity"})
 		return
 	}
-	if orderlist.Order.Paymentmethod == "PAYNOW"{
+	if orderlist.Order.Paymentmethod == "PAYNOW" {
 		var wallet model.Wallet
 		userID := c.GetUint("userid")
 		if err := database.DB.First(&wallet, "user_id=?", userID).Error; err != nil {
@@ -243,8 +243,12 @@ func Cancelorder(c *gin.Context) {
 				return
 			}
 		}
-		wallet.Amount += float64(orderlist.Subtotal)
-		
+		if orderamount.Totalamount < orderlist.Subtotal {
+			wallet.Amount += float64(orderamount.Totalamount)
+		} else {
+			wallet.Amount += float64(orderamount.Totalamount)
+		}
+
 		if err := database.DB.Save(&wallet).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to save amount to wallet"})
 			return
@@ -255,25 +259,23 @@ func Cancelorder(c *gin.Context) {
 		if err := database.DB.First(&coupon, "code=?", orderamount.Code).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Cant find coupon code"})
 			return
-			} else {
-				// orderamount.Totalamount += uint(coupon.Discount)
-				// orderamount.Totalamount -= orderlist.Subtotal
-				orderamount.Code = ""
-			}
-			if err := database.DB.Save(&orderamount).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order details"})
-				return
-			}
+		} else {
+			// orderamount.Totalamount += uint(coupon.Discount)
+			// orderamount.Totalamount -= orderlist.Subtotal
+			orderamount.Code = ""
 		}
-		
-		
-		if orderlist.Order.Paymentmethod != "PAYNOW" {
-			orderlist.Orderstatus = "cancelled"
-			orderlist.Ordercancelreason = reason
-			if err := database.DB.Save(&orderlist).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order item"})
-			}
+		if err := database.DB.Save(&orderamount).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order details"})
+			return
 		}
-		c.JSON(http.StatusOK, gin.H{"Message": "Order successfully cancelled"})
 	}
-	
+
+	if orderlist.Order.Paymentmethod != "PAYNOW" {
+		orderlist.Orderstatus = "cancelled"
+		orderlist.Ordercancelreason = reason
+		if err := database.DB.Save(&orderlist).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order item"})
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{"Message": "Order successfully cancelled"})
+}
