@@ -278,6 +278,7 @@ func Cancelorder(c *gin.Context) {
 				return
 			} else {
 				orderamount.Code = ""
+				orderamount.Totalamount += uint(coupon.Discount)
 			}
 			if err := database.DB.Save(&orderamount).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order details"})
