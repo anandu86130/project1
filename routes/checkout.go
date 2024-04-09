@@ -75,9 +75,15 @@ func Checkout(c *gin.Context) {
 		return
 	}
 	if paymentmethod == "PAYNOW" {
+		paymentupdate := model.Paymentdetails{
+			Paymentamount: int(totalamount),
+			Paymentstatus: "Pending",
+		}
+		database.DB.Create(&paymentupdate)
 
 		razorId, errr := payment.Paymenthandler(strconv.Itoa(int(orderitems[0].ID)), int(totalamount))
 		if errr != nil {
+			database.DB.Model(&paymentupdate).Update("Paymentstatus", "Failed")
 			c.JSON(http.StatusBadRequest, gin.H{"Error": errr})
 			return
 		}
@@ -88,7 +94,7 @@ func Checkout(c *gin.Context) {
 			OrderId:       razorId,
 			Paymentamount: int(totalamount),
 			Reciept:       uint(recieptID),
-			Paymentstatus: "Pending",
+			Paymentstatus: "Failed",
 		}
 		database.DB.Create(&create)
 		c.JSON(http.StatusOK, gin.H{"Message": "Complete the payment", "Order": razorId})

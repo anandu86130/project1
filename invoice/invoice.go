@@ -24,13 +24,13 @@ func Invoicedownload(c *gin.Context) {
 		return
 	}
 	var orderitems []model.Orderitems
-	if err := database.DB.Preload("Product").Preload("Order").Where("order_id", ID).First(&orderitems).Error; err != nil {
+	if err := database.DB.Preload("Product").Preload("Order").Where("order_id", ID).Find(&orderitems).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find order"})
 		return
 	}
 
 	var order model.Order
-	if err := database.DB.Preload("Address").Where("ID = ?", ID).First(&order).Error; err != nil {
+	if err := database.DB.Preload("Address").Where("ID = ?", ID).Find(&order).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find order"})
 		return
 	}
