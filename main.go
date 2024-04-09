@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"project1/bestcategory"
 	"project1/bestproduct"
 	"project1/database"
 	"project1/helper"
@@ -74,6 +75,8 @@ func main() {
 	r.GET("/user/invoice/:ID", jwt.AuthMiddleware("user"), invoice.Invoicedownload)
 	//Best SellingProduct
 	r.GET("/user/bestsellingproduct", jwt.AuthMiddleware("user"), bestproduct.BestSellingProduct)
+	//Best SellingCategory
+	r.GET("/user/bestsellingcategory", jwt.AuthMiddleware("user"), bestcategory.BestSellingCategory)
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 

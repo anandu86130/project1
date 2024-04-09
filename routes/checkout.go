@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"math/rand"
 	"net/http"
 	"project1/database"

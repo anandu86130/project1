@@ -42,14 +42,11 @@ func Invoicedownload(c *gin.Context) {
 		}
 	}
 
-	// Generate the PDF
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 16)
-	// Set the title to include the user's name
 	pdf.Cell(40, 10, "Invoice to "+user.Name)
 
-	// Add address information
 	pdf.Ln(10)
 	pdf.Cell(40, 10, "Address:")
 	pdf.Ln(10)
@@ -58,7 +55,6 @@ func Invoicedownload(c *gin.Context) {
 	pdf.Cell(40, 10, order.Address.City+", "+order.Address.State+", "+order.Address.Country+" - "+order.Address.Pincode)
 	pdf.Ln(20)
 
-	// Create table headers
 	pdf.Ln(10)
 	pdf.SetFillColor(240, 240, 240)
 	pdf.CellFormat(40, 10, "Order Item", "1", 0, "", true, 0, "")
@@ -67,7 +63,6 @@ func Invoicedownload(c *gin.Context) {
 	pdf.CellFormat(30, 10, "Amount", "1", 0, "", true, 0, "")
 	pdf.Ln(10)
 
-	// Populate the table with order items data
 	for _, items := range orderitems {
 		quantityStr := strconv.Itoa(int(items.Quantity))
 		amountStr := strconv.Itoa(int(items.Subtotal))
@@ -78,17 +73,14 @@ func Invoicedownload(c *gin.Context) {
 		pdf.Ln(10)
 	}
 
-	// Write PDF content to a buffer
 	var buf bytes.Buffer
 	if err := pdf.Output(&buf); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to generate PDF"})
 		return
 	}
 
-	// Set HTTP headers for PDF download
 	c.Header("Content-Type", "application/pdf")
 	c.Header("Content-Disposition", "attachment; filename=invoice.pdf")
 
-	// Write the PDF content to the response body
 	c.Data(http.StatusOK, "application/pdf", buf.Bytes())
 }
