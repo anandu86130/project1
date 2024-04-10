@@ -32,7 +32,7 @@ func dailySalesReport(c *gin.Context) {
 	endDate := startDate.Add(24 * time.Hour)
 
 	var order []model.Orderitems
-	if err := database.DB.Preload("Order").Preload("Prouct").Where("created_at BETWEEN ? AND ?", startDate, endDate).Find(&order).Error; err != nil {
+	if err := database.DB.Preload("Order").Preload("Product").Where("created_at BETWEEN ? AND ?", startDate, endDate).Find(&order).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to fetch orders"})
 		return
 	}
@@ -85,7 +85,7 @@ func generatepdf(c *gin.Context, order []model.Orderitems) {
 
 	var totalAmount float64
 	for _, item := range order {
-		if item.Orderstatus == "delivered" || item.Orderstatus == "pending" {
+		if item.Orderstatus == "delivered" {
 			pdf.CellFormat(20, 10, strconv.Itoa(int(item.OrderID)), "1", 0, "C", false, 0, "")
 			pdf.CellFormat(30, 10, item.Order.Orderdate.Format("2006-01-02"), "1", 0, "C", false, 0, "")
 			pdf.CellFormat(40, 10, item.Product.Product_name, "1", 0, "", false, 0, "")
