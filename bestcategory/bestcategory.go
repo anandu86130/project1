@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"project1/database"
 	"project1/model"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,32 +17,53 @@ func BestSellingCategory(c *gin.Context) {
 		return
 	}
 
-	productQuantity := make(map[uint]uint)
-
-	var bestSellingProduct model.Product
-	var maxQuantity uint
+	categoryQuantity := make(map[uint]uint)
 
 	for _, item := range orderItems {
 		productID := item.ProductID
+
+		var product model.Product
+		if err := database.DB.Preload("Category").First(&product, productID).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product"})
+			return
+		}
+
+		categoryID := product.CategoryID
 		quantity := item.Quantity
 
-		productQuantity[productID] += quantity
+		categoryQuantity[categoryID] += quantity
+	}
 
-		for productID, quantity := range productQuantity {
-			if quantity > maxQuantity {
-				maxQuantity = quantity
+	type CategoryQuantity struct {
+		CategoryID uint
+		Quantity   uint
+	}
 
-				if err := database.DB.Preload("Category").First(&bestSellingProduct, productID).Error; err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find best selling product"})
-					return
-				}
-			}
+	var categoryQuantities []CategoryQuantity
+	for categoryID, quantity := range categoryQuantity {
+		categoryQuantities = append(categoryQuantities, CategoryQuantity{CategoryID: categoryID, Quantity: quantity})
+	}
+
+	sort.Slice(categoryQuantities, func(i, j int) bool {
+		return categoryQuantities[i].Quantity > categoryQuantities[j].Quantity
+	})
+
+	var topCategories []model.Category
+	for i := 0; i < 10 && i < len(categoryQuantities); i++ {
+		var category model.Category
+		if err := database.DB.First(&category, categoryQuantities[i].CategoryID).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find category"})
+			return
 		}
+		topCategories = append(topCategories, category)
 	}
 	var details []gin.H
-	details = append(details, gin.H{
-		"categoryName": bestSellingProduct.Category.Name,
-		"Description":  bestSellingProduct.Category.Description,
-	})
+	for _, category := range topCategories {
+		details = append(details, gin.H{
+			"categoryName":      category.Name,
+			"Description":       category.Description,
+			"TotalQuantitySold": categoryQuantity[category.ID],
+		})
+	}
 	c.JSON(http.StatusOK, gin.H{"Message": details})
 }

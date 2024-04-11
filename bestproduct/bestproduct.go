@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"project1/database"
 	"project1/model"
+	"sort"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,36 +19,45 @@ func BestSellingProduct(c *gin.Context) {
 
 	productQuantity := make(map[uint]uint)
 
-	var bestSellingProduct model.Product
-	var maxQuantity uint
-
 	for _, item := range orderItems {
-		productID := item.ProductID
-		quantity := item.Quantity
+		productQuantity[item.ProductID] += item.Quantity
+	}
 
-		productQuantity[productID] += quantity
+	type ProductQuantity struct {
+		ProductID uint
+		Quantity  uint
+	}
 
-		for productID, quantity := range productQuantity {
-			if quantity > maxQuantity {
-				maxQuantity = quantity
+	var productQuantities []ProductQuantity
+	for productID, quantity := range productQuantity {
+		productQuantities = append(productQuantities, ProductQuantity{ProductID: productID, Quantity: quantity})
+	}
 
-				if err := database.DB.First(&bestSellingProduct, productID).Error; err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find best selling product"})
-					return
-				}
-			}
+	sort.Slice(productQuantities, func(i, j int) bool {
+		return productQuantities[i].Quantity > productQuantities[j].Quantity
+	})
+
+	var topProducts []model.Product
+	for i:=0; i<10 && i<len(productQuantities); i++{
+		var product model.Product
+		if err := database.DB.First(&product, productQuantities[i].ProductID).Error; err != nil{
+			c.JSON(http.StatusInternalServerError, gin.H{"Error":"Failed to find product details"})
+			return
 		}
+		topProducts = append(topProducts, product)
 	}
 	var details []gin.H
-	details = append(details, gin.H{
-		"BestSellingProduct": bestSellingProduct.Product_name,
-		"ProductPrice":       bestSellingProduct.Price,
-		"ImagePath1":         bestSellingProduct.ImagePath1,
-		"ImagePath2":         bestSellingProduct.ImagePath2,
-		"ImagePath3":         bestSellingProduct.ImagePath3,
-		"Description":        bestSellingProduct.Description,
-		"Size":               bestSellingProduct.Size,
-		"TotalQuantitySold":  maxQuantity,
-	})
+	for _, product := range topProducts{
+		details = append(details, gin.H{
+			"BestSellingProduct": product.Product_name,
+			"ProductPrice":       product.Price,
+			"ImagePath1":         product.ImagePath1,
+			"ImagePath2":         product.ImagePath2,
+			"ImagePath3":         product.ImagePath3,
+			"Description":        product.Description,
+			"Size":               product.Size,
+			"TotalQuantitySold":  productQuantity[product.ID],
+		})
+	}
 	c.JSON(http.StatusOK, gin.H{"Message": details})
 }
