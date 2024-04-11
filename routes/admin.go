@@ -49,9 +49,9 @@ func Getuser(c *gin.Context) {
 	var responseData []gin.H
 	for _, user := range users {
 		userdata := gin.H{
-			"id":    user.UserID,
-			"name":  user.Name,
-			"email": user.Email,
+			"Id":    user.UserID,
+			"Name":  user.Name,
+			"Email": user.Email,
 		}
 		responseData = append(responseData, userdata)
 	}
@@ -70,9 +70,9 @@ func Category(c *gin.Context) {
 	var categories []gin.H
 	for _, categorydetails := range category {
 		fetchedcategory := gin.H{
-			"categoryid":  categorydetails.ID,
-			"name":        categorydetails.Name,
-			"description": categorydetails.Description,
+			"Categoryid":  categorydetails.ID,
+			"Name":        categorydetails.Name,
+			"Description": categorydetails.Description,
 		}
 		categories = append(categories, fetchedcategory)
 	}
@@ -104,7 +104,7 @@ func Addcategory(c *gin.Context) {
 
 func Aproduct(c *gin.Context) {
 	var product []model.Product
-	result := database.DB.Find(&product)
+	result := database.DB.Preload("Category").Find(&product)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to connect products"})
 		return
@@ -112,15 +112,16 @@ func Aproduct(c *gin.Context) {
 	var products []gin.H
 	for _, fetchedproducts := range product {
 		productdetails := gin.H{
-			"productid":   fetchedproducts.ID,
-			"name":        fetchedproducts.Product_name,
-			"imagepath1":  fetchedproducts.ImagePath1,
-			"imagepath2":  fetchedproducts.ImagePath2,
-			"imagepath3":  fetchedproducts.ImagePath3,
-			"description": fetchedproducts.Description,
-			"price":       fetchedproducts.Price,
-			"size":        fetchedproducts.Size,
-			"quantity":    fetchedproducts.Quantity,
+			"Productid":   fetchedproducts.ID,
+			"Name":        fetchedproducts.Product_name,
+			"Imagepath1":  fetchedproducts.ImagePath1,
+			"Imagepath2":  fetchedproducts.ImagePath2,
+			"Imagepath3":  fetchedproducts.ImagePath3,
+			"Description": fetchedproducts.Description,
+			"Category":    fetchedproducts.Category.Name,
+			"Price":       fetchedproducts.Price,
+			"Size":        fetchedproducts.Size,
+			"Quantity":    fetchedproducts.Quantity,
 		}
 		products = append(products, productdetails)
 	}
