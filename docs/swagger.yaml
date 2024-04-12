@@ -1,0 +1,147 @@
+basePath: /
+definitions:
+  model.OTP:
+    properties:
+      email:
+        type: string
+      exp:
+        type: string
+      id:
+        type: integer
+      otp:
+        type: string
+    type: object
+  model.UserModel:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      status:
+        type: boolean
+      user_id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A Tag service API in Go using Gin Framework
+  title: Tag Service API
+  version: "1.0"
+paths:
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: User Login with email and password
+      parameters:
+      - description: User Login Crededentials
+        in: body
+        name: Usermodel
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+      summary: User Login
+      tags:
+      - Login
+  /user/otpsignup:
+    post:
+      consumes:
+      - application/json
+      description: create new user with otp
+      parameters:
+      - description: User SignUp Crededentials
+        in: body
+        name: otp
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTP'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+      summary: User Otp SignUp
+      tags:
+      - OtpSignup
+  /user/product:
+    get:
+      description: viewing product for user
+      produces:
+      - application/json
+      responses: {}
+      summary: User Productview
+      tags:
+      - UserModel-Product
+  /user/resendotp:
+    post:
+      consumes:
+      - application/json
+      description: Resend otp for user
+      parameters:
+      - description: Resendotp
+        in: body
+        name: otp
+        required: true
+        schema:
+          $ref: '#/definitions/model.OTP'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+      summary: User Resend Otp
+      tags:
+      - ResendOtp
+  /user/signup:
+    post:
+      consumes:
+      - application/json
+      description: SignUp new user with email and password
+      parameters:
+      - description: User SignUp Crededentials
+        in: body
+        name: usermodel
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserModel'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+      summary: User SignUp
+      tags:
+      - Signup
+swagger: "2.0"
