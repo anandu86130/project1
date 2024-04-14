@@ -80,7 +80,6 @@ func main() {
 	//user logout
 	r.GET("/user/logout", jwt.AuthMiddleware("user"), routes.Logout)
 
-	
 	//admin authentucation
 	r.POST("/admin/signin", routes.Signin)
 	// admin user management
@@ -112,5 +111,5 @@ func main() {
 	//admin logout
 	r.GET("/admin/logout", jwt.AuthMiddleware("admin"), routes.AdminLogout)
 
-	r.Run(":5432")
+	r.Run(":8080")
 }
