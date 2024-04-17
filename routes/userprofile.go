@@ -9,8 +9,9 @@ import (
 )
 
 type Person struct {
-	Name  string
-	Email string
+	UserID uint
+	Name   string
+	Email  string
 }
 
 type UserAddress struct {
@@ -39,8 +40,9 @@ func UserProfile(c *gin.Context) {
 	}
 
 	users := Person{
-		Name:  user.Name,
-		Email: user.Email,
+		UserID: user.UserID,
+		Name:   user.Name,
+		Email:  user.Email,
 	}
 
 	for _, A := range address {
