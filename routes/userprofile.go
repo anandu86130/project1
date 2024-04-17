@@ -49,7 +49,7 @@ func UserProfile(c *gin.Context) {
 		Addressshow = append(Addressshow, UserAddress{A.Address, A.City, A.Landmark, A.State, A.Country, &A.Pincode})
 	}
 
-	c.JSON(http.StatusInternalServerError, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"user":    users,
 		"address": Addressshow,
 	})
