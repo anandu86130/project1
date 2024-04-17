@@ -11,7 +11,7 @@ import (
 func Productsearch(c *gin.Context) {
 	search := c.Request.FormValue("search")
 	if search == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please send the search"})	
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Please send the search"})
 		return
 	}
 	var details []gin.H

@@ -38,16 +38,16 @@ func BestSellingProduct(c *gin.Context) {
 	})
 
 	var topProducts []model.Product
-	for i:=0; i<10 && i<len(productQuantities); i++{
+	for i := 0; i < 10 && i < len(productQuantities); i++ {
 		var product model.Product
-		if err := database.DB.First(&product, productQuantities[i].ProductID).Error; err != nil{
-			c.JSON(http.StatusInternalServerError, gin.H{"Error":"Failed to find product details"})
+		if err := database.DB.First(&product, productQuantities[i].ProductID).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to find product details"})
 			return
 		}
 		topProducts = append(topProducts, product)
 	}
 	var details []gin.H
-	for _, product := range topProducts{
+	for _, product := range topProducts {
 		details = append(details, gin.H{
 			"BestSellingProduct": product.Product_name,
 			"ProductPrice":       product.Price,

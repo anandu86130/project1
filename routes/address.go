@@ -20,7 +20,7 @@ func AddAddress(c *gin.Context) {
 	var address model.Address
 	err := c.BindJSON(&address)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error":"Failed to bind"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to bind"})
 		return
 	}
 
@@ -28,12 +28,12 @@ func AddAddress(c *gin.Context) {
 	database.DB.Where("address=?", address.Address).First(&dbaddress)
 
 	if dbaddress.AddressId != 0 && address.Address == dbaddress.Address {
-		c.JSON(http.StatusConflict, gin.H{"Error":"This address already exists"})
+		c.JSON(http.StatusConflict, gin.H{"Error": "This address already exists"})
 		return
 	}
 
 	if len(address.Pincode) != 6 {
-		c.JSON(http.StatusBadRequest, gin.H{"Error":"Invalid pincode"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Invalid pincode"})
 		return
 	}
 
@@ -47,11 +47,11 @@ func AddAddress(c *gin.Context) {
 		UserId:   user.UserID,
 	})
 	if create.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"Error":"Failed to create address"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to create address"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"Message":"Address added successfully"})
+	c.JSON(http.StatusOK, gin.H{"Message": "Address added successfully"})
 }
 
 func EditAddress(c *gin.Context) {
@@ -59,13 +59,13 @@ func EditAddress(c *gin.Context) {
 	var address model.Address
 	update := c.BindJSON(&address)
 	if update != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"Error":"Failed to bind"})
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to bind"})
 		return
 	}
 	var dbaddress model.Address
 	result := database.DB.First(&dbaddress, id)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error":"Address not found"})
+		c.JSON(http.StatusNotFound, gin.H{"Error": "Address not found"})
 		return
 	}
 
@@ -83,14 +83,14 @@ func Deleteaddress(c *gin.Context) {
 	var dbaddress model.Address
 	result := database.DB.Where("address_id=?", addressID).First(&dbaddress)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error":"Address not found"})
+		c.JSON(http.StatusNotFound, gin.H{"Error": "Address not found"})
 		return
 	}
 	delete := database.DB.Delete(&dbaddress)
 	if delete.Error != nil {
-		c.JSON(http.StatusInternalServerError,gin.H{"Error":"Failed to delete address"})
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to delete address"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"Message":"Address deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"Message": "Address deleted successfully"})
 }
