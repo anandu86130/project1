@@ -40,7 +40,7 @@ func UserProfile(c *gin.Context) {
 	}
 
 	users := Person{
-		UserID: user.UserID,
+		UserID: userid,
 		Name:   user.Name,
 		Email:  user.Email,
 	}
