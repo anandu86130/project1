@@ -15,12 +15,13 @@ type Person struct {
 }
 
 type UserAddress struct {
-	Address  string
-	City     string
-	Landmark string
-	State    string
-	Country  string
-	Pincode  *string
+	AddressId uint
+	Address   string
+	City      string
+	Landmark  string
+	State     string
+	Country   string
+	Pincode   *string
 }
 
 func UserProfile(c *gin.Context) {
@@ -46,7 +47,7 @@ func UserProfile(c *gin.Context) {
 	}
 
 	for _, A := range address {
-		Addressshow = append(Addressshow, UserAddress{A.Address, A.City, A.Landmark, A.State, A.Country, &A.Pincode})
+		Addressshow = append(Addressshow, UserAddress{A.AddressId, A.Address, A.City, A.Landmark, A.State, A.Country, &A.Pincode})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
