@@ -155,6 +155,7 @@ func Orderview(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"order id":       orderdetails.ID,
 			"Amount":         orderdetails.Totalamount,
+			"Coupon":         orderdetails.Code,
 			"payment method": orderdetails.Paymentmethod,
 			"order date":     orderdetails.Orderdate,
 		})
