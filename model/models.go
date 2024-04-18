@@ -49,9 +49,9 @@ type Product struct {
 	ImagePath2   string     `json:"imagepath2"`
 	ImagePath3   string     `json:"imagepath3"`
 	Description  string     `json:"description"`
-	Price        int       `json:"price"`
+	Price        int        `json:"price"`
 	Size         string     `json:"size"`
-	Quantity     int       `json:"quantity"`
+	Quantity     int        `json:"quantity"`
 	DeletedAt    *time.Time `gorm:"index"`
 }
 
@@ -69,7 +69,7 @@ type Cart struct {
 	UserID    uint `json:"user_id"`
 	Product   Product
 	ProductID uint `json:"product_id"`
-	Quantity  int `json:"quantity"`
+	Quantity  int  `json:"quantity"`
 }
 
 type Order struct {
