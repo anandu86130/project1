@@ -134,6 +134,17 @@ func Addproduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"Error": "Failed to bind"})
 		return
 	}
+
+	if Product.Price < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please enter a valid price"})
+		return
+	}
+
+	if Product.Quantity < 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"Error": "Please enter a valid quantity"})
+		return
+	}
+
 	var dbproduct model.Product
 	result := database.DB.Where("product_name=?", Product.Product_name).Find(&dbproduct)
 	if result.Error != nil {

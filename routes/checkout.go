@@ -46,7 +46,7 @@ func Checkout(c *gin.Context) {
 	}
 	// var orders []model.Order
 	var orderitems []model.Orderitems
-	var totalamount uint
+	var totalamount int
 	for _, cartitem := range cart {
 		totalamount += cartitem.Quantity * cartitem.Product.Price
 
@@ -67,7 +67,7 @@ func Checkout(c *gin.Context) {
 	}
 	currenttime := time.Now()
 
-	totalamount = uint(float64(totalamount) - coupon.Discount)
+	totalamount = int(float64(totalamount) - coupon.Discount)
 
 	paymentmethod := c.Request.FormValue("paymentmethod")
 	if paymentmethod == "" {
@@ -103,7 +103,7 @@ func Checkout(c *gin.Context) {
 		UserID:        userid,
 		CouponId:      coupon.ID,
 		Code:          coupon.Code,
-		Totalquantity: uint(len(cart)),
+		Totalquantity: int(len(cart)),
 		Totalamount:   totalamount,
 		Paymentmethod: paymentmethod,
 		AddressId:     uint(addressID),
@@ -263,7 +263,7 @@ func Cancelorder(c *gin.Context) {
 			return
 		}
 
-		orderamount.Totalamount -= uint(amountToAdd)
+		orderamount.Totalamount -= int(amountToAdd)
 		if err := database.DB.Save(&orderamount).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order details"})
 			return
@@ -278,7 +278,7 @@ func Cancelorder(c *gin.Context) {
 				return
 			} else {
 				orderamount.Code = ""
-				orderamount.Totalamount += uint(coupon.Discount)
+				orderamount.Totalamount += int(coupon.Discount)
 			}
 			if err := database.DB.Save(&orderamount).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"Error": "Failed to update order details"})

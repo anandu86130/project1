@@ -195,7 +195,7 @@ func Productdetails(c *gin.Context) {
 	}
 	type productdetails struct {
 		Name        string
-		Price       uint
+		Price       int
 		Imagepath1  string
 		ImagePath2  string
 		ImagePath3  string

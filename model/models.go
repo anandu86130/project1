@@ -49,9 +49,9 @@ type Product struct {
 	ImagePath2   string     `json:"imagepath2"`
 	ImagePath3   string     `json:"imagepath3"`
 	Description  string     `json:"description"`
-	Price        uint       `json:"price"`
+	Price        int       `json:"price"`
 	Size         string     `json:"size"`
-	Quantity     uint       `json:"quantity"`
+	Quantity     int       `json:"quantity"`
 	DeletedAt    *time.Time `gorm:"index"`
 }
 
@@ -69,7 +69,7 @@ type Cart struct {
 	UserID    uint `json:"user_id"`
 	Product   Product
 	ProductID uint `json:"product_id"`
-	Quantity  uint `json:"quantity"`
+	Quantity  int `json:"quantity"`
 }
 
 type Order struct {
@@ -78,8 +78,8 @@ type Order struct {
 	UserID        uint `json:"user_id"`
 	CouponId      uint
 	Code          string
-	Totalquantity uint
-	Totalamount   uint
+	Totalquantity int
+	Totalamount   int
 	Paymentmethod string
 	Address       Address
 	AddressId     uint `json:"address_id"`
@@ -92,8 +92,8 @@ type Orderitems struct {
 	OrderID           uint `json:"order_id"`
 	Product           Product
 	ProductID         uint
-	Quantity          uint
-	Subtotal          uint
+	Quantity          int
+	Subtotal          int
 	Orderstatus       string `json:"orderstatus"`
 	Ordercancelreason string
 }

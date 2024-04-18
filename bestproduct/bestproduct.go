@@ -17,7 +17,7 @@ func BestSellingProduct(c *gin.Context) {
 		return
 	}
 
-	productQuantity := make(map[uint]uint)
+	productQuantity := make(map[uint]int)
 
 	for _, item := range orderItems {
 		productQuantity[item.ProductID] += item.Quantity
@@ -25,7 +25,7 @@ func BestSellingProduct(c *gin.Context) {
 
 	type ProductQuantity struct {
 		ProductID uint
-		Quantity  uint
+		Quantity  int
 	}
 
 	var productQuantities []ProductQuantity
