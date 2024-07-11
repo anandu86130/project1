@@ -45,7 +45,7 @@ func CartView(c *gin.Context) {
 	}
 	cart = []model.Cart{}
 }
-
+	
 func Addtocart(c *gin.Context) {
 	userID := c.GetUint("userid")
 	idStr := c.Param("ID")
