@@ -59,7 +59,7 @@ func Signup(c *gin.Context) {
 	}
 
 	send.SendOTPByEmail(newOTP.Email, newOTP.Otp)
-	c.JSON(http.StatusOK, gin.H{"Message": "OTP send succcessfully"})
+	c.JSON(http.StatusOK, gin.H{"Message": "OTP send successfully"})
 }
 
 func Otpsignup(c *gin.Context) {
