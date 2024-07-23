@@ -1,6 +1,6 @@
 FROM golang:1.21.1
 
-WORKDIR /golib
+WORKDIR /PROJECT
 
 COPY go.mod go.sum ./
 RUN go mod download
@@ -9,8 +9,8 @@ RUN go mod download
 COPY . .
 
 
-RUN go build -o golib
+RUN go build -o PROJECT
 
 EXPOSE 8080
 
-CMD ["./golib"]
+CMD ["./PROJECT"]
