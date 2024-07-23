@@ -1,0 +1,31 @@
+  version: '3.9'
+
+
+  services:
+    postgres:
+      image: postgres:16.1
+      restart: unless-stopped
+      environment:
+        POSTGRES_DB: ecommerce
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: rapunzel
+      ports:
+        - "5434:5432"
+      networks:
+        - app-network
+
+    golib:
+      build:
+        context: .
+      environment:
+        DB_Config: "host=postgres user=postgres password=rapunzel dbname=ecommerce port=5432 sslmode=disable"  
+      ports:
+        - "8080:8080"
+      depends_on:
+        - postgres
+      networks:
+        - app-network
+
+  networks:
+    app-network:
+      driver: bridge
